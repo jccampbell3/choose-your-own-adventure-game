@@ -1,117 +1,38 @@
-Press CTRL-Shift-V to preview .MD files. 
 # Choose Your Own Adventure (CYOA) Game
 
-## Homework Instructions: 
-https://docs.google.com/document/d/1f-YFPrVFI4oKv7H9p0zZgL-5OgdwJsOYUYoUnc-r1Y8/edit?tab=t.0#heading=h.4jkzdf4ipmah  
-
-## Reference book by Mr. Kareem Dana from CIDM3312. 
-While we are not using Razor pages, Mr. Dana's ebook still has several helpful chapters on dotnet new console, top level statements, classes, lists, GitHub commands and merge conflicts, etc. 
-https://danacidm.gitbook.io/cidm-3312  
-
-## Repository Setup Instructions:
-
-Complete this before other team members work on the repo.
-
-Only one developer should run the following process to set up the .NET console app and push to GitHub:
-
-1. On GitHub.com, create a GitHub Issue.
-2. Create a new branch from the GitHub Issue.
-3. Clone the repository, or run `git pull` if you already have the repo locally.
-4. Switch to your new branch.
-5. Run `dotnet new console` in your branch on your local computer.
-6. Commit and push to your branch.
-7. Create a GitHub Pull Request.
-8. Merge the branch into `main`.
-
-After this is complete, tell the other team members to run:
+A C# (.NET 10) console game for CIDM Software Systems Development. Players create a character, choose a path, and fight or flee from a dragon. Supports English, Spanish, French, and Italian.
 
 ```
-git pull
+dotnet run                # play
+dotnet test CYOATests     # run the tests
 ```
 
-## Run the App: 
-To run the application, type the following into the terminal, which looks for and runs Program.cs. If needed, dotnet run first builds and compiles the program before running it. 
-```
-dotnet run
-```
+## Development Changes
 
-## Build the App: 
-This command is optional because dotnet run will also build the app prior to running the app if needed. But to build the application without running the application, type this command in the terminal. Building the app let's the compiler compile and warn you of any compile errors or problems.
-```
-dotnet build
-```
+### 1. Fixed `Messages.cs` bugs
+**Branch:** `fix/messages-null-maps-and-language-reload` · **Commit:** `5b51db2`
 
-Some developers like to run these two commands together. 
-```
-dotnet build
-dotnet run
-```
+- **Null display maps:** The constructor never set up `_displayRaceMap`, `_displayOccupationMap`, or `_displayWeaponMap`, so calling a `Translate...ForDisplay` method before `ReadDictionary()` crashed. They are now set up in the constructor, which also removed the three CS8618 build warnings.
+- **Language switching did nothing:** `SetCurrentLanguage()` changed the language name but not the loaded text. It now reloads the text if text was already loaded, and `CurrentLanguage` has a private setter.
 
-## Where to put your .cs files? 
-Put your .cs files in the root folder, which is the same folder where Program.cs is located. This app is a simple program with only a few .cs file so we do not need complex folder organizations. 
+### 2. Added Italian
+**Branch:** `feature/italian-language` · **Commit:** `7f412ab`
 
-## Do we need a namespace? 
-Not needed. For this simple app, you are using "top-level statements" instead of namespaces. Just put all your .cs files in the same root folder and your code will find the other classes' methods. Ask AI what "top-level statements" are to learn more or see Mr. Kareen Dana's ebook on the topic (link below). With top-level statements, the Program.cs file does not need static void Main() syntax. 
+- **`language_data.json`:** Added an `"Italian"` section with all messages, and with race, occupation, and weapon translations that map to the English names the game logic uses.
+- **`Game.cs`:** Added `4. Italiano` to the language menu.
+- **Tests:** Added 3 tests, including one that fails if Italian is missing any key English has.
 
-## How to use a method in another class? 
-Example of how to use a method in another class. This example assumes a Die class was designed according to the Class Diagram. In your code, type something like the following.
-```
-//Example use of Die class and roll method
-Die die = new Die();
-int rollResult = die.Roll(4);
-System.Console.WriteLine($"You rolled a dice value of {rollResult}");
-```
+Commands (`n`, `s`, `e`, `a`, `r`, `roll`) stay in English, and accents are left out to match the existing languages. See [ADR 0001](docs/adr/0001-add-italian-language.md).
 
-## Useful Git Commands
-```
-git add -A  
-git commit -m "explanation of your changes" 
-git push
-git status   
-```
+### 3. Documentation
+- Added [ADR 0001](docs/adr/0001-add-italian-language.md) for the Italian decision (commit `bc93769`).
+- Rewrote this README.
 
-### Switch to a branch
-```
-git switch branch-name
-```
+## Test Status
+97 MSTest tests, all passing, with no build warnings when the `Messages.cs` fix is included.
 
-See a list of all branches. 
-```
-git pull
-git branch -a
-```
-
-### Someone changed main and I want those changes in my branch
-If you are making changes in your branch and you see some changes in main that you want to pull down into your current branch, for example, someone may have updated Program.cs or added a class you need, use the following git command. 
-
-1. Switch to your remote branch (if you're not already on it):
-```
-git switch your-branch-name
-```
-2. Pull from origin main
-```
-git pull origin main
-```
-This will merge the changes from main into your current branch. If there are conflicts, Git will notify you, and you'll need to resolve them manually before completing the merge.
-
-### Undo uncommitted changes and revert back to main: 
-Oh No! I have royally messed up my local branch and want to revert it back to the latest committed state. Use this only if you made a lot of changes (but not yet pushed to GitHub yet), messed up things and want to revert back to the most current files on your remote branch. This command will discard all uncommitted changes in your working directory and staging area.
-```
-git fetch branch-name
-git reset --hard origin/branch-name
-```
-or if you want to revert back to the current files in main: 
-```
-git fetch origin
-git reset --hard origin/main
-```
-Warning: This operation is destructive and cannot be undone. Make sure you are okay with losing any uncommitted changes before running it. Ask AI if you want to know more. 
-
-If you already pushed your changes to GitHub, then you need a different way to revert the committed changes. 
-
-
-### What are the /bin/ and /obj/ folders? Can I delete the /bin/ and /obj/ folders? What is a .gitignore file? 
-Great questions. Ask AI those questions and learn. 
-
-
-
+## Known Issues (not yet fixed)
+- Invalid input at the combat prompt counts as an attack.
+- A Halfling can start with 0 or less health.
+- `ReadDictionary()` has no error handling for a missing or malformed JSON file.
+- The language menu is hard-coded in `Game.cs` instead of read from the JSON file.
