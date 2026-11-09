@@ -161,6 +161,46 @@ public class MessagesTests
         }
     }
 
+    [TestMethod]
+    public void ReadDictionary_LoadsItalianWelcomeMessage()
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage("Italian");
+        messages.ReadDictionary();
+        Assert.AreEqual("Benvenuto nel Gioco Scegli la Tua Avventura", messages.GetMessage("welcome"));
+    }
+
+    [TestMethod]
+    public void Italian_HasEveryKeyThatEnglishHas()
+    {
+        string jsonPath = Path.Combine(AppContext.BaseDirectory, "language_data.json");
+        using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(jsonPath));
+        var english = doc.RootElement.GetProperty("English");
+        var italian = doc.RootElement.GetProperty("Italian");
+
+        foreach (string section in new[] { "dictionary", "displayRaceMap", "displayOccupationMap", "displayWeaponMap" })
+        {
+            foreach (var entry in english.GetProperty(section).EnumerateObject())
+            {
+                Assert.IsTrue(italian.GetProperty(section).TryGetProperty(entry.Name, out _),
+                    $"Italian '{section}' is missing key '{entry.Name}'.");
+            }
+        }
+    }
+
+    [TestMethod]
+    public void Italian_RaceAndOccupationInputsNormalizeToEnglish()
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage("Italian");
+        messages.ReadDictionary();
+
+        Assert.AreEqual("Halfling", messages.NormalizeRace("Mezzuomo"));
+        Assert.AreEqual("Archer", messages.NormalizeOccupation("arciere"));
+        Assert.AreEqual("Mezzuomo", messages.TranslateRaceForDisplay("Halfling"));
+        Assert.AreEqual("spada lunga", messages.TranslateWeaponForDisplay("long sword"));
+    }
+
     // --- IsValidRace ---
 
     [TestMethod]
