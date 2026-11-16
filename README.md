@@ -41,7 +41,21 @@ Commands (`n`, `s`, `w`, `i`, `e`, `a`, `r`, `roll`) stay in English, and accent
 - Typing `i` or `inventory` at the crossroads shows the Weapon and its max damage, plus Magical Armor if owned, then returns to the path prompt. Looking changes nothing.
 - The lines come from `Inventory.cs`, with no console code.
 
-### 6. Documentation
+### 6. Fixed Halfling starting health
+**Commit:** `b666bb9`
+
+- Starting HealthPoints are a d20 roll plus the Strength modifier, but never below 1. A Halfling's negative modifier could make them start at 0 or less.
+- `Player` now takes its `Die` in the constructor, so tests can script character-creation rolls.
+
+### 7. One Prompt module for all input
+**Commits:** `5591014`, `e7dfc53`, `c3a9623`, `a617276`, `418da80`, `79b7c41`
+
+- Every prompt goes through `Prompt.cs`: ask, re-ask with an error on invalid input. The language menu still reads once.
+- If input runs out at any prompt (for example, a closed console), the adventure ends with "Adventure ends. Bye." instead of looping forever.
+- Invalid input at the combat prompt now asks again instead of counting as an attack.
+- `Game` takes an optional input, output and `Die`, so tests play whole adventures, including Dragon fights and Prayers, with scripted rolls. Shared test helpers live in `CYOATests/TestSupport.cs`.
+
+### 8. Documentation
 - Added [ADR 0001](docs/adr/0001-add-italian-language.md) (Italian) and [ADR 0002](docs/adr/0002-magical-weapon-canonical-names.md) (Magical Weapon names).
 - Added domain terms to `GLOSSARY.md`.
 - Specs and tickets for each feature live in `.scratch/`.
