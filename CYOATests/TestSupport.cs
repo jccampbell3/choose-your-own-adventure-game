@@ -38,7 +38,7 @@ public static class TestSupport
     /// <summary>
     /// Plays the real game with the given input lines and returns everything it printed.
     /// Every roll is 1, so the run is deterministic; use the overload to script the rolls.
-    /// Scripts must end the game (for example with "e"), because the path prompt loops forever when input runs out.
+    /// When the lines run out, the game ends the adventure as a closed console would.
     /// </summary>
     public static string RunGame(params string[] lines) => RunGame(new ScriptedDie(), lines);
 
@@ -50,9 +50,33 @@ public static class TestSupport
         return output.ToString();
     }
 
-    /// <summary>A reader that answers each prompt with the next line.</summary>
-    public static TextReader ScriptedInput(params string[] lines) =>
-        new StringReader(string.Join(Environment.NewLine, lines) + Environment.NewLine);
+    /// <summary>
+    /// A reader that answers each prompt with the next line, then reports end of input like a closed console.
+    /// A game that keeps reading after that fails the test instead of hanging.
+    /// </summary>
+    public static TextReader ScriptedInput(params string[] lines) => new ScriptedReader(lines);
+
+    private sealed class ScriptedReader : TextReader
+    {
+        // More end-of-input reads than any prompt sequence needs; only a prompt looping on end of input gets here.
+        private const int MaxReadsAfterEnd = 5;
+
+        private readonly Queue<string> _lines;
+        private int _readsAfterEnd;
+
+        public ScriptedReader(IEnumerable<string> lines) => _lines = new Queue<string>(lines);
+
+        public override string? ReadLine()
+        {
+            if (_lines.Count > 0)
+                return _lines.Dequeue();
+
+            if (++_readsAfterEnd > MaxReadsAfterEnd)
+                throw new InvalidOperationException("The game kept reading after input ended.");
+
+            return null;
+        }
+    }
 
     /// <summary>How many times <paramref name="value"/> appears in <paramref name="text"/>, without overlaps.</summary>
     public static int CountOccurrences(string text, string value)

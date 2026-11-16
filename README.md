@@ -52,6 +52,5 @@ Commands (`n`, `s`, `w`, `i`, `e`, `a`, `r`, `roll`) stay in English, and accent
 ## Known Issues (not yet fixed)
 - Invalid input at the combat prompt counts as an attack.
 - A Halfling can start with 0 or less health.
-- If input runs out at the path prompt (for example, a closed console), the game loops forever.
 - `ReadDictionary()` has no error handling for a missing or malformed JSON file.
 - The language menu is hard-coded in `Game.cs` instead of read from the JSON file.

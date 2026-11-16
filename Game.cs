@@ -3,6 +3,7 @@ public class Game
     private readonly TextReader _input;
     private readonly TextWriter _output;
     private readonly Die _die;
+    private readonly Prompt _prompt;
 
     // True only when writing to the real console, the one place where text colour applies.
     private readonly bool _outputIsConsole;
@@ -17,6 +18,7 @@ public class Game
         _output = output ?? Console.Out;
         _outputIsConsole = output == null;
         _die = die ?? new Die();
+        _prompt = new Prompt(_input, _output);
     }
 
     public void StartGame()
@@ -46,13 +48,24 @@ public class Game
         _output.WriteLine(messages.GetMessage("welcome"));
         _output.WriteLine();
 
-        // Main menu loop
+        // The one place that handles input running out: the adventure simply ends.
+        try
+        {
+            RunMainMenu(dragon, messages);
+        }
+        catch (InputEndedException)
+        {
+            _output.WriteLine(messages.GetMessage("adventure_ends"));
+        }
+    }
+
+    private void RunMainMenu(Dragon dragon, Messages messages)
+    {
         bool running = true;
         while (running)
         {
-            _output.WriteLine(messages.GetMessage("menu"));
-            _output.Write(messages.GetMessage("enter_choice"));
-            string? choice = _input.ReadLine()?.Trim();
+            string choice = _prompt.Ask<string>(messages.GetMessage("menu"), ParseMenuChoice,
+                messages.GetMessage("invalid"), messages.GetMessage("enter_choice"));
 
             if (choice == "1")
             {
@@ -87,16 +100,34 @@ public class Game
                     }
                 }
             }
-            else if (choice == "2")
+            else
             {
                 _output.WriteLine(messages.GetMessage("goodbye"));
                 running = false;
             }
-            else
-            {
-                _output.WriteLine(messages.GetMessage("invalid"));
-            }
         }
+    }
+
+    // Main menu: "1" creates a character, "2" exits.
+    private static bool ParseMenuChoice(string? input, out string choice)
+    {
+        choice = input?.Trim() ?? "";
+        return choice == "1" || choice == "2";
+    }
+
+    // Path prompt: a Path ("north", "south", "west"), "inventory", or "exit".
+    private static bool ParsePathChoice(string? input, out string choice)
+    {
+        choice = input?.Trim().ToLower() switch
+        {
+            "n" or "north" => "north",
+            "s" or "south" => "south",
+            "w" or "west" => "west",
+            "i" or "inventory" => "inventory",
+            "e" or "exit" => "exit",
+            _ => ""
+        };
+        return choice != "";
     }
 
     public void EndGame(bool playerWon, bool playerRetreated, Messages messages)
@@ -139,30 +170,15 @@ public class Game
     {
         while (true)
         {
-            _output.WriteLine(messages.GetMessage("path_prompt_full"));
-            _output.Write(messages.GetMessage("enter_choice"));
-            string? input = _input.ReadLine()?.Trim().ToLower();
+            string choice = _prompt.Ask<string>(messages.GetMessage("path_prompt_full"), ParsePathChoice,
+                messages.GetMessage("path_invalid"), messages.GetMessage("enter_choice"));
 
-            if (input == "north" || input == "n")
-                return "north";
+            if (choice != "inventory")
+                return choice;
 
-            if (input == "south" || input == "s")
-                return "south";
-
-            if (input == "west" || input == "w")
-                return "west";
-
-            if (input == "exit" || input == "e")
-                return "exit";
-
-            if (input == "inventory" || input == "i")
-            {
-                foreach (string line in Inventory.Lines(player, messages))
-                    _output.WriteLine(line);
-                continue;
-            }
-
-            _output.WriteLine(messages.GetMessage("path_invalid"));
+            // Looking at the Inventory changes nothing; show it and ask again.
+            foreach (string line in Inventory.Lines(player, messages))
+                _output.WriteLine(line);
         }
     }
 
@@ -179,25 +195,8 @@ public class Game
 
         _output.WriteLine(messages.GetMessage("merchant_greeting"));
 
-        MerchantChoice choice;
-        while (true)
-        {
-            _output.WriteLine(messages.GetMessage("merchant_offer"));
-            _output.Write(messages.GetMessage("enter_choice"));
-            string? input = _input.ReadLine();
-
-            // End of input: treat as leaving so a closed console can't loop forever.
-            if (input == null)
-            {
-                choice = MerchantChoice.Leave;
-                break;
-            }
-
-            if (Merchant.TryParseChoice(input, out choice))
-                break;
-
-            _output.WriteLine(messages.GetMessage("merchant_invalid"));
-        }
+        MerchantChoice choice = _prompt.Ask<MerchantChoice>(messages.GetMessage("merchant_offer"), Merchant.TryParseChoice,
+            messages.GetMessage("merchant_invalid"), messages.GetMessage("enter_choice"));
 
         switch (Merchant.Choose(player, choice))
         {
@@ -232,25 +231,8 @@ public class Game
         _output.WriteLine(messages.GetMessage("shrine_greeting"));
         _output.WriteLine(messages.GetMessage("shrine_warning"));
 
-        ShrineChoice choice;
-        while (true)
-        {
-            _output.WriteLine(messages.GetMessage("shrine_offer"));
-            _output.Write(messages.GetMessage("enter_choice"));
-            string? input = _input.ReadLine();
-
-            // End of input: treat as leaving so a closed console can't loop forever.
-            if (input == null)
-            {
-                choice = ShrineChoice.Leave;
-                break;
-            }
-
-            if (Shrine.TryParseChoice(input, out choice))
-                break;
-
-            _output.WriteLine(messages.GetMessage("shrine_invalid"));
-        }
+        ShrineChoice choice = _prompt.Ask<ShrineChoice>(messages.GetMessage("shrine_offer"), Shrine.TryParseChoice,
+            messages.GetMessage("shrine_invalid"), messages.GetMessage("enter_choice"));
 
         ShrineResult result = Shrine.Choose(player, choice, _die);
         switch (result.Outcome)
