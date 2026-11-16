@@ -50,3 +50,7 @@ _Avoid_: Smite, punishment
 **Magical Weapon**:
 The Player's own Weapon, enchanted by the Merchant to deal more damage. It keeps its Occupation's character (a magical long sword is still a long sword).
 _Avoid_: New weapon, replacement weapon
+
+**Inventory**:
+The Weapon and any Magical Armor the Player carries. Looking at it changes nothing. Whether the Player has prayed is not part of it.
+_Avoid_: Bag, items, equipment
