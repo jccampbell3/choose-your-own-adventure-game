@@ -4,7 +4,7 @@
 
 **Blocked by:** 02 (The game is given its input, output and Die)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] The main menu, the Path prompt, the Merchant and the Shrine ask through the Prompt module, with the same prompts, Commands and error messages as before
 - [ ] Input running out at the main menu, the Path prompt, the Merchant or the Shrine prints the "adventure ends" message and the game returns
@@ -17,3 +17,5 @@
 - [ ] All existing tests pass
 
 ## Comments
+
+**2026-11-16:** Implemented in c3a9623.

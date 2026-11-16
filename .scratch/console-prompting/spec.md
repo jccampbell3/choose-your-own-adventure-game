@@ -1,6 +1,6 @@
 # Spec: One Prompt module for all console input
 
-Status: ready-for-agent
+Status: resolved
 
 ## Problem Statement
 
@@ -85,3 +85,12 @@ All console input goes through one Prompt module. It shows a prompt, reads a lin
 - After this lands, update the README: remove the two input bugs from Known Issues and update the test count.
 
 ## Comments
+
+**2026-11-16 (implemented):** Done on `main` in 5591014 (01), e7dfc53 (02), c3a9623 (03), a617276 (04) and 418da80 (05), with review fixes in 79b7c41. Both agreed seams are tested; 262 tests pass. Invalid combat input now asks again, and input running out at any prompt ends the adventure. The two-axis review found no documented-standard breaches and no missing requirements after the review fixes. Open judgement calls, not blocking:
+
+- The game still sets the console text colour for the red Dragon intro, but only when writing to the real console. This breaks the letter of "only the game's defaults refer to the console", to keep the colour.
+- When input ends at a prompt with an "enter choice" label, the "adventure ends" message prints on that label's line.
+- The main-menu and next-action parse rules return "1"/"2" text and are identical; the Race and Occupation parse rules share a shape. Choice types (like `CombatChoice`) would remove both.
+- Messages, the Prompt module and the writer travel together through Combat and character creation, and the Prompt already holds the writer.
+- The output parameter is named `writer` in the Player but `output` elsewhere; the `roll` prompt's parse rule returns a bool that carries nothing.
+- The language menu still reads input directly, as agreed.

@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] One shared test-support file provides: run a scripted game, count occurrences, the English-Fighter script, load Messages for a Language, and the scripted Die
 - [ ] The scripted Die no longer lives inside the Dragon Armor tests; every test that used it still compiles and passes
@@ -14,3 +14,5 @@
 - [ ] All existing tests pass, with the same test count
 
 ## Comments
+
+**2026-11-16:** Implemented in 5591014.

@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 (Shared game-test helpers)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] The game can be created with an input reader, an output writer and a Die; with none given, it uses the real console and a real Die
 - [ ] Tests that still swap the global console before creating a game keep working
@@ -17,3 +17,5 @@
 - [ ] All existing tests pass; no player-facing text or behaviour changes
 
 ## Comments
+
+**2026-11-16:** Implemented in e7dfc53.

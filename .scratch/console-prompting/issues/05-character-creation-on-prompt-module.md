@@ -4,7 +4,7 @@
 
 **Blocked by:** 03 (Prompt module: running out of input ends the adventure at the menus, the Path, the Merchant and the Shrine)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] The Race, name, Occupation, `roll` and next-action prompts ask through the Prompt module, with the same text, accepted answers and error messages as before
 - [ ] Input running out at any character-creation prompt prints the "adventure ends" message and the game returns
@@ -14,3 +14,5 @@
 - [ ] All existing tests pass
 
 ## Comments
+
+**2026-11-16:** Implemented in 418da80.

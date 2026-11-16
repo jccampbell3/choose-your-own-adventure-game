@@ -4,7 +4,7 @@
 
 **Blocked by:** 03 (Prompt module: running out of input ends the adventure at the menus, the Path, the Merchant and the Shrine)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Invalid input at the combat prompt shows the error and asks again; the Dragon takes no damage and the Player makes no attack because of it
 - [ ] `a`/`attack` and `r`/`retreat` at the combat prompt, and the Dragon-encounter choices, behave as before
@@ -14,3 +14,5 @@
 - [ ] All existing tests pass
 
 ## Comments
+
+**2026-11-16:** Implemented in a617276.
