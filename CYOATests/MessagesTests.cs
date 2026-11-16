@@ -239,6 +239,22 @@ public class MessagesTests
     }
 
     [TestMethod]
+    [DataRow("English")]
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void PathPromptAndPathInvalid_MentionInventoryCommand(string language)
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage(language);
+        messages.ReadDictionary();
+
+        StringAssert.Contains(messages.GetMessage("path_prompt_full"), "'i'", $"{language} path prompt must mention 'i'.");
+        StringAssert.Contains(messages.GetMessage("path_invalid"), "'i'", $"{language} path-invalid text must list 'i'.");
+        Assert.AreNotEqual("[inventory_header]", messages.GetMessage("inventory_header"), $"{language} is missing 'inventory_header'.");
+    }
+
+    [TestMethod]
     public void LanguageData_HasNoAccentedLetters()
     {
         string jsonPath = Path.Combine(AppContext.BaseDirectory, "language_data.json");

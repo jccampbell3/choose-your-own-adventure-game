@@ -144,6 +144,16 @@ public class GameTests
     }
 
     [TestMethod]
+    [DataRow("i")]
+    [DataRow("inventory")]
+    [DataRow(" INVENTORY ")]
+    public void IsValidPathChoice_ReturnsTrue_ForInventory(string input)
+    {
+        Game game = new Game();
+        Assert.IsTrue(game.IsValidPathChoice(input));
+    }
+
+    [TestMethod]
     public void IsValidPathChoice_ReturnsTrue_ForS()
     {
         Game game = new Game();

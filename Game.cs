@@ -45,7 +45,7 @@ public class Game
                 bool inAdventureMenu = true;
                 while (inAdventureMenu)
                 {
-                    string selectedPath = PromptForPath(messages);
+                    string selectedPath = PromptForPath(player, messages);
 
                     if (selectedPath == "exit")
                     {
@@ -106,6 +106,7 @@ public class Game
         return trimmed == "n" || trimmed == "north" ||
                trimmed == "s" || trimmed == "south" ||
                trimmed == "w" || trimmed == "west" ||
+               trimmed == "i" || trimmed == "inventory" ||
                trimmed == "e" || trimmed == "exit";
     }
 
@@ -117,7 +118,7 @@ public class Game
                trimmed == "r" || trimmed == "retreat";
     }
 
-    private string PromptForPath(Messages messages)
+    private string PromptForPath(Player player, Messages messages)
     {
         while (true)
         {
@@ -136,6 +137,13 @@ public class Game
 
             if (input == "exit" || input == "e")
                 return "exit";
+
+            if (input == "inventory" || input == "i")
+            {
+                foreach (string line in Inventory.Lines(player, messages))
+                    Console.WriteLine(line);
+                continue;
+            }
 
             Console.WriteLine(messages.GetMessage("path_invalid"));
         }
