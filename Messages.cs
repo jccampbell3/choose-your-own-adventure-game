@@ -2,7 +2,8 @@ using System.Text.Json;
 
 public class Messages
 {
-    public string CurrentLanguage { get; set; }
+    public string CurrentLanguage { get; private set; }
+    private bool _isLoaded;
     private Dictionary<string, string> _dictionary;
     private Dictionary<string, string> _raceMap;
     private Dictionary<string, string> _occupationMap;
@@ -16,11 +17,18 @@ public class Messages
         _dictionary = new Dictionary<string, string>();
         _raceMap = new Dictionary<string, string>();
         _occupationMap = new Dictionary<string, string>();
+        _displayRaceMap = new Dictionary<string, string>();
+        _displayOccupationMap = new Dictionary<string, string>();
+        _displayWeaponMap = new Dictionary<string, string>();
     }
 
     public void SetCurrentLanguage(string language)
     {
         CurrentLanguage = language;
+
+        // If text was already loaded, reload it so the language change takes effect.
+        if (_isLoaded)
+            ReadDictionary();
     }
 
     public void ReadDictionary()
@@ -54,6 +62,8 @@ public class Messages
         _displayWeaponMap = new Dictionary<string, string>();
         foreach (JsonProperty entry in langSection.GetProperty("displayWeaponMap").EnumerateObject())
             _displayWeaponMap[entry.Name] = entry.Value.GetString() ?? string.Empty;
+
+        _isLoaded = true;
     }
 
     public string GetMessage(string key)
