@@ -1,6 +1,6 @@
 # Spec: South Path Merchant
 
-Status: ready-for-agent
+Status: resolved
 
 ## Problem Statement
 
@@ -96,3 +96,13 @@ Taking the South Path leads the Player to a Merchant who offers one Magical Item
 - Domain terms follow `GLOSSARY.md`: Merchant, Magical Item, Magical Armor, Magical Weapon, Canonical Name, Command, Language, Path.
 - ADR 0002 records the per-weapon Canonical Name decision and why the Merchant gives the item away for free.
 - Balance target: both items should be noticeable but never decisive. Armor blocks about 30% of average claw damage. The Weapon adds about 1 average damage per hit.
+
+## Comments
+
+**2026-11-16 (implemented):** Done on `feature/south-merchant` in e54bdcd and 776c067, after merging the `Messages` prerequisite (e3844e4). All four agreed seams are tested; 147 tests pass. The two-axis review found no documented-standard breaches and no missing requirements. Open judgement calls, not blocking:
+
+- Choosing the Weapon when the Player has no Weapon reports the outcome as Left. This can't happen in play, because every Occupation starts with a Weapon.
+- `Armor.Type` (`magical armor`) is used only by tests. The display uses the `armor_name` text, so the two could drift apart.
+- The Armor stats lines are written out separately in `Player.DisplayStats` and `Combat.GetCombatStatsDisplay`, as the Weapon lines already were.
+- Ask a native speaker to check the Spanish and Italian lightning-spell names (`hechizo de rayo magico`, `incantesimo del fulmine magico`). They can read as "spell of the magic lightning".
+- Additions not in the spec: end of input at the Merchant counts as Leave, and a test keeps `language_data.json` ASCII-only.
