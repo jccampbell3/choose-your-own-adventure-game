@@ -1,16 +1,10 @@
 // CYOATests/InventoryTests.cs
 // Inventory seam: the Inventory lines are built without the console.
+using static TestSupport;
+
 [TestClass]
 public class InventoryTests
 {
-    private static Messages LoadMessages(string language)
-    {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage(language);
-        messages.ReadDictionary();
-        return messages;
-    }
-
     private static Player CreatePlayer(Weapon? weapon = null)
     {
         return new Player

@@ -1,16 +1,10 @@
 // CYOATests/StartingHealthTests.cs
 // Character-creation seam: a scripted Die drives every roll, scripted input answers the prompts.
+using static TestSupport;
+
 [TestClass]
 public class StartingHealthTests
 {
-    private static Messages LoadEnglish()
-    {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage("English");
-        messages.ReadDictionary();
-        return messages;
-    }
-
     // Creates a Fighter of the given Race; "2" at the end proceeds, "1" first would show the stats screen.
     private static (Player player, string output) CreateCharacter(string race, int[] rolls, params string[] nextActions)
     {
@@ -29,7 +23,7 @@ public class StartingHealthTests
         Console.SetOut(output);
         try
         {
-            player.CreateCharacter(LoadEnglish());
+            player.CreateCharacter(LoadMessages());
         }
         finally
         {

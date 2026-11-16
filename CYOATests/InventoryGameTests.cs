@@ -1,45 +1,12 @@
 // CYOATests/InventoryGameTests.cs
 // Game entry point seam: scripted standard input drives the real game loop.
+using static TestSupport;
+
 [TestClass]
 public class InventoryGameTests
 {
     private const string PathPrompt = "Which do you take?";
     private const string InventoryHeader = "----- Inventory -----";
-
-    // Language, main menu, race, name, occupation, three rolls, then "proceed".
-    private static readonly string[] CreateEnglishFighter =
-    {
-        "1", "1", "human", "Hero", "fighter", "roll", "roll", "roll", "2"
-    };
-
-    private static string RunGame(params string[] lines)
-    {
-        TextReader originalIn = Console.In;
-        TextWriter originalOut = Console.Out;
-        StringWriter output = new StringWriter();
-
-        Console.SetIn(new StringReader(string.Join(Environment.NewLine, lines) + Environment.NewLine));
-        Console.SetOut(output);
-        try
-        {
-            new Game().StartGame();
-        }
-        finally
-        {
-            Console.SetIn(originalIn);
-            Console.SetOut(originalOut);
-        }
-
-        return output.ToString();
-    }
-
-    private static int CountOccurrences(string text, string value)
-    {
-        int count = 0;
-        for (int i = text.IndexOf(value); i >= 0; i = text.IndexOf(value, i + value.Length))
-            count++;
-        return count;
-    }
 
     [TestMethod]
     [DoNotParallelize] // redirects the shared Console

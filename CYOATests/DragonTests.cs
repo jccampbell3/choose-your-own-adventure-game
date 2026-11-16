@@ -2,17 +2,11 @@ using System;
 using System.IO;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static TestSupport;
+
 [TestClass]
 public class DragonTests
 {
-
-    private Messages GetMessages(string language = "English")
-    {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage(language);
-        messages.ReadDictionary();
-        return messages;
-    }
 
     [TestMethod]
     public void NewDragon_InitializesRequiredProperties()
@@ -36,7 +30,7 @@ public class DragonTests
     {
         Die die = new Die();
         Dragon dragon = new Dragon(die);
-        Messages messages = GetMessages();
+        Messages messages = LoadMessages();
 
         string taunt = dragon.GetRandomDefenseTaunt(messages);
 
@@ -56,7 +50,7 @@ public class DragonTests
     {
         Die die = new Die();
         Dragon dragon = new Dragon(die);
-        Messages messages = GetMessages();
+        Messages messages = LoadMessages();
 
         string reply = dragon.GetRandomDamageReply(messages);
 
@@ -84,7 +78,7 @@ public class DragonTests
             HealthPoints = 30
         };
 
-        string result = dragon.Attack(player, GetMessages());
+        string result = dragon.Attack(player, LoadMessages());
 
         Assert.IsFalse(string.IsNullOrWhiteSpace(result));
     }
@@ -104,7 +98,7 @@ public class DragonTests
 
         int startingHealth = player.HealthPoints;
 
-        string result = dragon.Attack(player, GetMessages());
+        string result = dragon.Attack(player, LoadMessages());
 
         Assert.IsTrue(player.HealthPoints <= startingHealth);
     }
@@ -122,7 +116,7 @@ public class DragonTests
             HealthPoints = 1
         };
 
-        string result = dragon.Attack(player, GetMessages());
+        string result = dragon.Attack(player, LoadMessages());
 
         Assert.IsTrue(player.HealthPoints >= 0);
     }

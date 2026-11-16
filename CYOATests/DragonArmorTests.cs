@@ -1,35 +1,11 @@
 // CYOATests/DragonArmorTests.cs
 // Dragon attack seam: a scripted Die fixes every roll so damage is exact.
-
-/// <summary>A Die that returns preset rolls in order (1 once the script runs out).</summary>
-public class ScriptedDie : Die
-{
-    private readonly Queue<int> _rolls = new();
-
-    public void Script(params int[] rolls)
-    {
-        foreach (int roll in rolls)
-            _rolls.Enqueue(roll);
-    }
-
-    public override int Roll(int sides)
-    {
-        return _rolls.Count > 0 ? _rolls.Dequeue() : 1;
-    }
-}
+using static TestSupport;
 
 [TestClass]
 public class DragonArmorTests
 {
     private const int StartingHealth = 20;
-
-    private static Messages GetMessages(string language = "English")
-    {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage(language);
-        messages.ReadDictionary();
-        return messages;
-    }
 
     private static Player CreatePlayer(bool withArmor, int health = StartingHealth)
     {
@@ -73,7 +49,7 @@ public class DragonArmorTests
         Player player = CreatePlayer(withArmor: true);
         Dragon dragon = CreateDragonThatHitsFor(rolledDamage);
 
-        dragon.Attack(player, GetMessages());
+        dragon.Attack(player, LoadMessages());
 
         Assert.AreEqual(StartingHealth - expectedLoss, player.HealthPoints);
     }
@@ -84,7 +60,7 @@ public class DragonArmorTests
         Player player = CreatePlayer(withArmor: false);
         Dragon dragon = CreateDragonThatHitsFor(7);
 
-        string output = dragon.Attack(player, GetMessages());
+        string output = dragon.Attack(player, LoadMessages());
 
         Assert.AreEqual(StartingHealth - 7, player.HealthPoints);
         StringAssert.Contains(output, "Smolderfang deals 7 damage.");
@@ -97,7 +73,7 @@ public class DragonArmorTests
         Player player = CreatePlayer(withArmor: true);
         Dragon dragon = CreateDragonThatHitsFor(5);
 
-        string output = dragon.Attack(player, GetMessages());
+        string output = dragon.Attack(player, LoadMessages());
 
         StringAssert.Contains(output, "Your magical armor absorbs 2 damage.");
         StringAssert.Contains(output, "Smolderfang deals 3 damage.");
@@ -110,7 +86,7 @@ public class DragonArmorTests
         Player player = CreatePlayer(withArmor: true);
         Dragon dragon = CreateDragonThatHitsFor(2);
 
-        string output = dragon.Attack(player, GetMessages());
+        string output = dragon.Attack(player, LoadMessages());
 
         StringAssert.Contains(output, "Your magical armor absorbs the whole blow!");
         Assert.IsFalse(output.Contains("deals"), "Damage-dealt line should not appear for a fully absorbed hit.");
@@ -124,7 +100,7 @@ public class DragonArmorTests
         Player player = CreatePlayer(withArmor: true, health: 3);
         Dragon dragon = CreateDragonThatHitsFor(12);
 
-        dragon.Attack(player, GetMessages());
+        dragon.Attack(player, LoadMessages());
 
         Assert.AreEqual(0, player.HealthPoints);
     }
@@ -135,7 +111,7 @@ public class DragonArmorTests
     [DataRow("Italian")]
     public void Attack_ArmorMessages_AreTranslated(string language)
     {
-        Messages messages = GetMessages(language);
+        Messages messages = LoadMessages(language);
 
         string partial = CreateDragonThatHitsFor(5).Attack(CreatePlayer(withArmor: true), messages);
         string full = CreateDragonThatHitsFor(1).Attack(CreatePlayer(withArmor: true), messages);

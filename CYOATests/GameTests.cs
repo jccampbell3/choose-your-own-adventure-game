@@ -1,76 +1,70 @@
 // CYOATests/GameTests.cs
+using static TestSupport;
+
 [TestClass]
 public class GameTests
 {
-    private Messages GetMessages(string language)
-    {
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage(language);
-        messages.ReadDictionary();
-        return messages;
-    }
-
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerWinsInEnglish()
     {
         Game game = new Game();
-        game.EndGame(true, false, GetMessages("English"));
+        game.EndGame(true, false, LoadMessages("English"));
     }
 
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerLosesInEnglish()
     {
         Game game = new Game();
-        game.EndGame(false, false, GetMessages("English"));
+        game.EndGame(false, false, LoadMessages("English"));
     }
 
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerWinsInSpanish()
     {
         Game game = new Game();
-        game.EndGame(true, false, GetMessages("Spanish"));
+        game.EndGame(true, false, LoadMessages("Spanish"));
     }
 
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerWinsInFrench()
     {
         Game game = new Game();
-        game.EndGame(true, false, GetMessages("French"));
+        game.EndGame(true, false, LoadMessages("French"));
     }
 
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerLosesInSpanish()
     {
         Game game = new Game();
-        game.EndGame(false, false, GetMessages("Spanish"));
+        game.EndGame(false, false, LoadMessages("Spanish"));
     }
 
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerLosesInFrench()
     {
         Game game = new Game();
-        game.EndGame(false, false, GetMessages("French"));
+        game.EndGame(false, false, LoadMessages("French"));
     }
 
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerRetreatsInEnglish()
     {
         Game game = new Game();
-        game.EndGame(false, true, GetMessages("English"));
+        game.EndGame(false, true, LoadMessages("English"));
     }
 
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerRetreatsInSpanish()
     {
         Game game = new Game();
-        game.EndGame(false, true, GetMessages("Spanish"));
+        game.EndGame(false, true, LoadMessages("Spanish"));
     }
 
     [TestMethod]
     public void EndGame_DoesNotThrow_WhenPlayerRetreatsInFrench()
     {
         Game game = new Game();
-        game.EndGame(false, true, GetMessages("French"));
+        game.EndGame(false, true, LoadMessages("French"));
     }
 
     // --- IsValidMenuChoice ---
