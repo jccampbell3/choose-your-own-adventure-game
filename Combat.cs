@@ -1,17 +1,24 @@
+/// <summary>A Command the Player can give at the Dragon encounter or in combat.</summary>
+public enum CombatChoice
+{
+    Attack,
+    Retreat
+}
+
 public class Combat
 {
     public Player player { get; set; }
     public Dragon dragon { get; set; }
     public Messages messages { get; set; }
 
-    private readonly TextReader _input;
+    private readonly Prompt _prompt;
     private readonly TextWriter _output;
 
     public bool PlayerRetreated { get; private set; }
 
-    public Combat(Player player, Dragon dragon, Messages messages, TextReader input, TextWriter output)
+    public Combat(Player player, Dragon dragon, Messages messages, Prompt prompt, TextWriter output)
     {
-        _input = input;
+        _prompt = prompt;
         _output = output;
         this.player = player;
         this.dragon = dragon;
@@ -35,20 +42,27 @@ public class Combat
             if (player.HealthPoints <= 0)
                 return false;
 
-            _output.WriteLine(messages.GetMessage("attack_prompt"));
-            string? input = _input.ReadLine()?.Trim().ToLower();
+            // Invalid input asks again; only 'a' starts another round.
+            CombatChoice choice = _prompt.Ask<CombatChoice>(messages.GetMessage("attack_prompt"), TryParseChoice,
+                messages.GetMessage("invalid"));
 
-            if (input == "r" || input == "retreat")
+            if (choice == CombatChoice.Retreat)
             {
                 PlayerRetreated = true;
                 _output.WriteLine(messages.GetMessage("retreat_combat"));
                 return false;
             }
+        }
+    }
 
-            if (input == "a" || input == "attack")
-                continue;
-
-            _output.WriteLine(messages.GetMessage("invalid"));
+    /// <summary>Reads a Command typed at the Dragon encounter or in combat: "a"/"attack" or "r"/"retreat".</summary>
+    public static bool TryParseChoice(string? input, out CombatChoice choice)
+    {
+        switch (input?.Trim().ToLower())
+        {
+            case "a": case "attack": choice = CombatChoice.Attack; return true;
+            case "r": case "retreat": choice = CombatChoice.Retreat; return true;
+            default: choice = default; return false;
         }
     }
 

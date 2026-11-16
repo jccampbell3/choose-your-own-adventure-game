@@ -275,36 +275,21 @@ public class Game
 
         _output.WriteLine(messages.GetMessage("dragon_stats_intro"));
         dragon.DisplayStats(messages, _output);
-        while (true)
-        {
-            _output.WriteLine(messages.GetMessage("dragon_encounter_prompt"));
-            _output.Write(messages.GetMessage("enter_choice"));
-            string? input = _input.ReadLine()?.Trim().ToLower();
 
-            if (input == "a" || input == "attack")
-            {
-                Combat combat = new Combat(player, dragon, messages, _input, _output);
-                bool playerWon = combat.StartCombat();
+        CombatChoice choice = _prompt.Ask<CombatChoice>(messages.GetMessage("dragon_encounter_prompt"), Combat.TryParseChoice,
+            messages.GetMessage("invalid"), messages.GetMessage("enter_choice"));
 
-                if (combat.PlayerRetreated)
-                {
-                    return; //combat already handled retreat message
-                }
-                else
-                {
-                   EndGame(playerWon, false, messages); 
-                }
-                
-                return;
-            }
-
-        if (input == "r" || input == "retreat")
+        if (choice == CombatChoice.Retreat)
         {
             _output.WriteLine(messages.GetMessage("retreat"));
             return;
         }
 
-        _output.WriteLine(messages.GetMessage("invalid"));
+        Combat combat = new Combat(player, dragon, messages, _prompt, _output);
+        bool playerWon = combat.StartCombat();
+
+        // A retreat during combat has already printed its own message.
+        if (!combat.PlayerRetreated)
+            EndGame(playerWon, false, messages);
     }
-}
 }

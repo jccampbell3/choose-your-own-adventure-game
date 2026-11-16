@@ -71,6 +71,54 @@ public class NorthPathGameTests
         Assert.IsFalse(output.Contains(Victory) || output.Contains(Defeat));
     }
 
+    private const string PlayerAttacks = "you withdraw your long sword and attack the dragon.";
+    private const string AttackPrompt = "Enter 'a' to attack or 'r' to retreat.";
+    private const string Invalid = "Invalid choice. Please try again.";
+
+    // Dragon 1/1/20. Player Strength 15+1, Agility 20, HealthPoints 20+1. Then two rounds where
+    // both sides miss (Player attack 20, Dragon attack 20), so nobody's health changes.
+    private static ScriptedDie TwoMissedRounds() => Rolls(1, 1, 20, 15, 1, 20, 20, 20, 20, 20, 20);
+
+    [TestMethod]
+    public void InvalidCombatInput_AsksAgainWithoutAttacking()
+    {
+        string output = GoNorth(TwoMissedRounds(), "a", "x", "a", "r");
+
+        Assert.AreEqual(1, CountOccurrences(output, Invalid));
+        Assert.AreEqual(2, CountOccurrences(output, PlayerAttacks), "Only 'a' attacks: the first round and the one after 'a'.");
+        Assert.AreEqual(3, CountOccurrences(output, AttackPrompt), "After round 1, again after the invalid input, after round 2.");
+        StringAssert.Contains(output, RetreatInCombat);
+    }
+
+    [TestMethod]
+    public void InvalidDragonEncounterInput_AsksAgain()
+    {
+        string output = GoNorth(Rolls(10, 10, 10, 10, 1, 10, 10), "x", "r");
+
+        Assert.AreEqual(1, CountOccurrences(output, Invalid));
+        Assert.AreEqual(2, CountOccurrences(output, "Do you wish to retreat or attack?"));
+        StringAssert.Contains(output, Retreat);
+    }
+
+    [TestMethod]
+    public void InputEndsAtTheDragonEncounter_EndsTheAdventure()
+    {
+        string output = GoNorth(Rolls(10, 10, 10, 10, 1, 10, 10));
+
+        StringAssert.Contains(output, "Do you wish to retreat or attack?");
+        Assert.IsTrue(output.TrimEnd().EndsWith("Adventure ends. Bye."), output);
+    }
+
+    [TestMethod]
+    public void InputEndsDuringCombat_EndsTheAdventureWithoutAnotherAttack()
+    {
+        string output = GoNorth(TwoMissedRounds(), "a");
+
+        Assert.AreEqual(1, CountOccurrences(output, PlayerAttacks));
+        StringAssert.Contains(output, AttackPrompt);
+        Assert.IsTrue(output.TrimEnd().EndsWith("Adventure ends. Bye."), output);
+    }
+
     [TestMethod]
     public void DragonEncounter_ShowsNarrativeIntroStatsAndPrompt()
     {

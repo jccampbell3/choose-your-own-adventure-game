@@ -44,7 +44,7 @@ public class CombatTests
         Dragon dragon = new Dragon(new Die());
         Messages messages = CreateEnglishMessages();
 
-        Combat combat = new Combat(player, dragon, messages, TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, dragon, messages, new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         Assert.AreSame(player, combat.player);
         Assert.AreSame(dragon, combat.dragon);
@@ -57,7 +57,7 @@ public class CombatTests
         Dragon dragon = new Dragon(new Die());
         Messages messages = CreateEnglishMessages();
 
-        Combat combat = new Combat(player, dragon, messages, TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, dragon, messages, new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         Assert.IsFalse(combat.PlayerRetreated);
     }
@@ -69,7 +69,7 @@ public class CombatTests
         Dragon dragon = CreateTestDragon();
         Messages messages = CreateEnglishMessages();
 
-        Combat combat = new Combat(player, dragon, messages, TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, dragon, messages, new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         string result = combat.GetCombatStatsDisplay();
 
@@ -83,7 +83,7 @@ public class CombatTests
         Dragon dragon = CreateTestDragon();
         Messages messages = CreateEnglishMessages();
 
-        Combat combat = new Combat(player, dragon, messages, TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, dragon, messages, new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         string result = combat.GetCombatStatsDisplay();
 
@@ -99,7 +99,7 @@ public class CombatTests
         Dragon dragon = CreateTestDragon();
         Messages messages = CreateEnglishMessages();
 
-        Combat combat = new Combat(player, dragon, messages, TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, dragon, messages, new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         string result = combat.GetCombatStatsDisplay();
 
@@ -118,7 +118,7 @@ public class CombatTests
         Dragon dragon = CreateTestDragon();
         Messages messages = CreateEnglishMessages();
 
-        Combat combat = new Combat(player, dragon, messages, TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, dragon, messages, new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         string result = combat.GetCombatStatsDisplay();
 
@@ -137,7 +137,7 @@ public class CombatTests
         Dragon dragon = CreateTestDragon();
         Messages messages = CreateEnglishMessages();
 
-        Combat combat = new Combat(player, dragon, messages, TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, dragon, messages, new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         string result = combat.GetCombatStatsDisplay();
 
@@ -156,7 +156,7 @@ public class CombatTests
     {
         Player player = CreateTestPlayer();
         player.Armor = new Armor();
-        Combat combat = new Combat(player, CreateTestDragon(), CreateEnglishMessages(), TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, CreateTestDragon(), CreateEnglishMessages(), new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         string result = combat.GetCombatStatsDisplay();
 
@@ -167,7 +167,7 @@ public class CombatTests
     [TestMethod]
     public void GetCombatStatsDisplay_WithoutArmor_ShowsNoArmorLines()
     {
-        Combat combat = new Combat(CreateTestPlayer(), CreateTestDragon(), CreateEnglishMessages(), TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(CreateTestPlayer(), CreateTestDragon(), CreateEnglishMessages(), new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         string result = combat.GetCombatStatsDisplay();
 
@@ -182,7 +182,7 @@ public class CombatTests
         Messages messages = new Messages();
         messages.SetCurrentLanguage("Italian");
         messages.ReadDictionary();
-        Combat combat = new Combat(player, CreateTestDragon(), messages, TextReader.Null, TextWriter.Null);
+        Combat combat = new Combat(player, CreateTestDragon(), messages, new Prompt(TextReader.Null, TextWriter.Null), TextWriter.Null);
 
         string result = combat.GetCombatStatsDisplay();
 
