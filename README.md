@@ -47,9 +47,8 @@ Commands (`n`, `s`, `w`, `i`, `e`, `a`, `r`, `roll`) stay in English, and accent
 - Specs and tickets for each feature live in `.scratch/`.
 
 ## Test Status
-213 MSTest tests, all passing.
+262 MSTest tests, all passing.
 
 ## Known Issues (not yet fixed)
-- A Halfling can start with 0 or less health.
 - `ReadDictionary()` has no error handling for a missing or malformed JSON file.
 - The language menu is hard-coded in `Game.cs` instead of read from the JSON file.

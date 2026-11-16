@@ -97,6 +97,43 @@ public class EndOfInputGameTests
     }
 
     [TestMethod]
+    [DataRow("2", "Spanish")]
+    [DataRow("3", "French")]
+    [DataRow("4", "Italian")]
+    public void InputEndsAtTheMainMenu_InOtherLanguages_EndsInThatLanguage(string choice, string language)
+    {
+        string output = RunGame(choice);
+
+        AssertEndsWith(output, LoadMessages(language).GetMessage("adventure_ends"));
+    }
+
+    [TestMethod]
+    [DataRow("2", new[] { "1", "humano", "Heroe", "guerrero" }, "Spanish", "")]
+    [DataRow("3", new[] { "1", "humain", "Heros", "guerrier" }, "French", "")]
+    [DataRow("4", new[] { "1", "umano", "Eroe", "guerriero" }, "Italian", "")]
+    [DataRow("2", new[] { "1", "humano", "Heroe", "guerrero" }, "Spanish", "w")]
+    [DataRow("3", new[] { "1", "humain", "Heros", "guerrier" }, "French", "w")]
+    [DataRow("4", new[] { "1", "umano", "Eroe", "guerriero" }, "Italian", "w")]
+    public void InputEndsAtThePathOrShrine_InOtherLanguages_EndsInThatLanguage(
+        string choice, string[] character, string language, string path)
+    {
+        string[] lines = new[] { choice }
+            .Concat(character)
+            .Concat(new[] { "roll", "roll", "roll", "2" })
+            .Concat(path == "" ? Array.Empty<string>() : new[] { path })
+            .ToArray();
+        Messages messages = LoadMessages(language);
+
+        string output = RunGame(lines);
+
+        if (path == "w")
+            StringAssert.Contains(output, messages.GetMessage("shrine_offer"));
+        else
+            StringAssert.Contains(output, messages.GetMessage("path_prompt_full"));
+        AssertEndsWith(output, messages.GetMessage("adventure_ends"));
+    }
+
+    [TestMethod]
     [DataRow("2", new[] { "1", "humano", "Heroe", "guerrero" }, "Spanish")]
     [DataRow("3", new[] { "1", "humain", "Heros", "guerrier" }, "French")]
     [DataRow("4", new[] { "1", "umano", "Eroe", "guerriero" }, "Italian")]
