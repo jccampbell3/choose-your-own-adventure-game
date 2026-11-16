@@ -19,7 +19,7 @@ _Avoid_: Localized command, shortcut
 ## Adventure
 
 **Path**:
-A direction the Player chooses at the crossroads: North (leads to the Dragon) or South (leads to the Merchant).
+A direction the Player chooses at the crossroads: North (leads to the Dragon), South (leads to the Merchant), or West (leads to a risk/reward detour).
 
 **Merchant**:
 The character met every time the Player takes the South Path. The Merchant offers a choice of one Magical Item; once the Player has one, the Merchant refuses to sell anything else.
@@ -31,6 +31,21 @@ Either Magical Armor or a Magical Weapon, as offered by the Merchant. A Player r
 **Magical Armor**:
 Protection that reduces the damage of every Dragon hit on the Player by a fixed amount.
 _Avoid_: Shield, defense bonus
+
+**Shrine**:
+The place at the end of the West Path. The Player may make one Prayer there per adventure; once they have prayed, the Shrine is silent on later visits. Leaving without praying does not use up the Prayer.
+_Avoid_: Temple, altar, fountain
+
+**Prayer**:
+The Player's single gamble at the Shrine, which can raise or lower their HealthPoints.
+_Avoid_: Wish, offering, bet
+
+**Blessing**:
+A Prayer outcome that raises the Player's HealthPoints.
+
+**Curse**:
+A Prayer outcome that lowers the Player's HealthPoints, but never below 1, and never raises them. Only the Dragon can kill the Player.
+_Avoid_: Smite, punishment
 
 **Magical Weapon**:
 The Player's own Weapon, enchanted by the Merchant to deal more damage. It keeps its Occupation's character (a magical long sword is still a long sword).

@@ -15,6 +15,9 @@ public class Player
     // Magical Armor from the Merchant; null when the Player has none.
     public Armor? Armor { get; set; }
 
+    // True once the Player has made their one Prayer at the Shrine. Not shown in the stats.
+    public bool HasPrayed { get; set; }
+
     public void CreateCharacter(Messages messages)
     {
         Race = PromptForRace(messages);

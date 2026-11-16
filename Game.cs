@@ -57,6 +57,10 @@ public class Game
                     {
                         HandleMerchantEncounter(player, messages);
                     }
+                    else if (selectedPath == "west")
+                    {
+                        HandleShrineEncounter(player, die, messages);
+                    }
                     else if (selectedPath == "north")
                     {
                         HandleDragonEncounter(player, dragon, messages);
@@ -101,6 +105,7 @@ public class Game
         string trimmed = input.Trim().ToLower();
         return trimmed == "n" || trimmed == "north" ||
                trimmed == "s" || trimmed == "south" ||
+               trimmed == "w" || trimmed == "west" ||
                trimmed == "e" || trimmed == "exit";
     }
 
@@ -125,6 +130,9 @@ public class Game
 
             if (input == "south" || input == "s")
                 return "south";
+
+            if (input == "west" || input == "w")
+                return "west";
 
             if (input == "exit" || input == "e")
                 return "exit";
@@ -183,6 +191,69 @@ public class Game
                 Console.WriteLine(messages.GetMessage("merchant_refusal"));
                 break;
         }
+    }
+
+    // Thin console loop around the Shrine's rules; afterwards the Player is back at the path prompt.
+    private void HandleShrineEncounter(Player player, Die die, Messages messages)
+    {
+        Console.WriteLine(messages.GetMessage("west_path_narrative"));
+
+        if (!Shrine.WillOffer(player))
+        {
+            Console.WriteLine(messages.GetMessage("shrine_silent"));
+            return;
+        }
+
+        Console.WriteLine(messages.GetMessage("shrine_greeting"));
+        Console.WriteLine(messages.GetMessage("shrine_warning"));
+
+        ShrineChoice choice;
+        while (true)
+        {
+            Console.WriteLine(messages.GetMessage("shrine_offer"));
+            Console.Write(messages.GetMessage("enter_choice"));
+            string? input = Console.ReadLine();
+
+            // End of input: treat as leaving so a closed console can't loop forever.
+            if (input == null)
+            {
+                choice = ShrineChoice.Leave;
+                break;
+            }
+
+            if (Shrine.TryParseChoice(input, out choice))
+                break;
+
+            Console.WriteLine(messages.GetMessage("shrine_invalid"));
+        }
+
+        ShrineResult result = Shrine.Choose(player, choice, die);
+        switch (result.Outcome)
+        {
+            case ShrineOutcome.Blessing:
+                PrintPrayer(result.Roll, "shrine_blessing", player, messages);
+                break;
+            case ShrineOutcome.Nothing:
+                PrintPrayer(result.Roll, "shrine_nothing", player, messages);
+                break;
+            case ShrineOutcome.Curse:
+                PrintPrayer(result.Roll, "shrine_curse", player, messages);
+                break;
+            case ShrineOutcome.Left:
+                Console.WriteLine(messages.GetMessage("shrine_leave"));
+                break;
+            case ShrineOutcome.Silent:
+                Console.WriteLine(messages.GetMessage("shrine_silent"));
+                break;
+        }
+    }
+
+    // A Prayer prints the roll, then what the gods did, then the Player's HealthPoints.
+    private static void PrintPrayer(int? roll, string outcomeKey, Player player, Messages messages)
+    {
+        Console.WriteLine(string.Format(messages.GetMessage("shrine_roll"), roll));
+        Console.WriteLine(messages.GetMessage(outcomeKey));
+        Console.WriteLine(messages.GetMessage("stats_health") + player.HealthPoints);
     }
 
     private void HandleDragonEncounter(Player player, Dragon dragon, Messages messages)

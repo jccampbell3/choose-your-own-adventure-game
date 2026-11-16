@@ -224,6 +224,21 @@ public class MessagesTests
     }
 
     [TestMethod]
+    [DataRow("English")]
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void PathPromptAndPathInvalid_MentionWestCommand(string language)
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage(language);
+        messages.ReadDictionary();
+
+        StringAssert.Contains(messages.GetMessage("path_prompt_full"), "'w'", $"{language} path prompt must list 'w'.");
+        StringAssert.Contains(messages.GetMessage("path_invalid"), "'w'", $"{language} path-invalid text must list 'w'.");
+    }
+
+    [TestMethod]
     public void LanguageData_HasNoAccentedLetters()
     {
         string jsonPath = Path.Combine(AppContext.BaseDirectory, "language_data.json");

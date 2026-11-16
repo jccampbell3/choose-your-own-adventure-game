@@ -134,6 +134,16 @@ public class GameTests
     }
 
     [TestMethod]
+    [DataRow("w")]
+    [DataRow("west")]
+    [DataRow(" WEST ")]
+    public void IsValidPathChoice_ReturnsTrue_ForWest(string input)
+    {
+        Game game = new Game();
+        Assert.IsTrue(game.IsValidPathChoice(input));
+    }
+
+    [TestMethod]
     public void IsValidPathChoice_ReturnsTrue_ForS()
     {
         Game game = new Game();
@@ -165,7 +175,7 @@ public class GameTests
     public void IsValidPathChoice_ReturnsFalse_ForInvalidInput()
     {
         Game game = new Game();
-        Assert.IsFalse(game.IsValidPathChoice("west"));
+        Assert.IsFalse(game.IsValidPathChoice("up"));
     }
 
     [TestMethod]
