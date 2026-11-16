@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static TestSupport;
 
@@ -123,46 +122,20 @@ public class DragonTests
 }
 
 [TestClass]
-[DoNotParallelize]
 public class GamePbi18Tests
 {
-    private TextReader? _originalIn;
-    private TextWriter? _originalOut;
-
-    [TestInitialize]
-    public void Setup()
-    {
-        _originalIn = Console.In;
-        _originalOut = Console.Out;
-    }
-
-    [TestCleanup]
-    public void Cleanup()
-    {
-        if (_originalIn != null)
-            Console.SetIn(_originalIn);
-
-        if (_originalOut != null)
-            Console.SetOut(_originalOut);
-    }
+    // The Dragon-encounter flow is tested through the game entry point in NorthPathGameTests.
 
     [TestMethod]
     public void DragonDisplayStats_UsesLocalizedLabels()
     {
-        Die die = new Die();
-        Dragon dragon = new Dragon(die);
+        Dragon dragon = new Dragon(new Die());
+        Messages messages = LoadMessages();
+        StringWriter writer = new StringWriter();
 
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage("English");
-        messages.ReadDictionary();
-
-        using StringWriter writer = new StringWriter();
-        Console.SetOut(writer);
-
-        dragon.DisplayStats(messages);
+        dragon.DisplayStats(messages, writer);
 
         string output = writer.ToString();
-
         StringAssert.Contains(output, messages.GetMessage("dragon_stats_header"));
         StringAssert.Contains(output, messages.GetMessage("stats_name"));
         StringAssert.Contains(output, messages.GetMessage("stats_strength"));
@@ -170,51 +143,6 @@ public class GamePbi18Tests
         StringAssert.Contains(output, messages.GetMessage("stats_health"));
         StringAssert.Contains(output, messages.GetMessage("stats_weapon"));
         StringAssert.Contains(output, messages.GetMessage("stats_damage"));
-    }
-
-    [TestMethod]
-    public void HandleDragonEncounter_AttackPath_DisplaysEncounterFlowText()
-    {
-        Game game = new Game();
-        Die die = new Die();
-        Dragon dragon = new Dragon(die);
-
-        Player player = new Player
-        {
-            Name = "TestHero",
-            Race = "Human",
-            Occupation = "Fighter",
-            Strength = 20,
-            Agility = 20,
-            HealthPoints = 25,
-            Weapon = new Weapon("long sword", 12, "-)=====>")
-        };
-
-        Messages messages = new Messages();
-        messages.SetCurrentLanguage("English");
-        messages.ReadDictionary();
-
-        // "a" enters combat, then "r" retreats from Combat immediately
-        Console.SetIn(new StringReader("a\nr\n"));
-
-        using StringWriter writer = new StringWriter();
-        Console.SetOut(writer);
-
-        MethodInfo? method = typeof(Game).GetMethod(
-            "HandleDragonEncounter",
-            BindingFlags.NonPublic | BindingFlags.Instance
-        );
-
-        Assert.IsNotNull(method, "HandleDragonEncounter method was not found.");
-
-        method!.Invoke(game, new object[] { player, dragon, messages });
-
-        string output = writer.ToString();
-
-        StringAssert.Contains(output, messages.GetMessage("north_path_narrative"));
-        StringAssert.Contains(output, string.Format(messages.GetMessage("dragon_intro"), dragon.Name));
-        StringAssert.Contains(output, messages.GetMessage("dragon_stats_intro"));
-        StringAssert.Contains(output, messages.GetMessage("dragon_encounter_prompt"));
     }
 
     [TestMethod]

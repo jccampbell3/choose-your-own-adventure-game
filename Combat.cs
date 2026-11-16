@@ -4,10 +4,15 @@ public class Combat
     public Dragon dragon { get; set; }
     public Messages messages { get; set; }
 
+    private readonly TextReader _input;
+    private readonly TextWriter _output;
+
     public bool PlayerRetreated { get; private set; }
 
-    public Combat(Player player, Dragon dragon, Messages messages)
+    public Combat(Player player, Dragon dragon, Messages messages, TextReader input, TextWriter output)
     {
+        _input = input;
+        _output = output;
         this.player = player;
         this.dragon = dragon;
         this.messages = messages;
@@ -16,7 +21,7 @@ public class Combat
 
     public bool StartCombat()
     {
-        Console.WriteLine(GetCombatStatsDisplay());
+        _output.WriteLine(GetCombatStatsDisplay());
 
         while (true)
         {
@@ -30,20 +35,20 @@ public class Combat
             if (player.HealthPoints <= 0)
                 return false;
 
-            Console.WriteLine(messages.GetMessage("attack_prompt"));
-            string? input = Console.ReadLine()?.Trim().ToLower();
+            _output.WriteLine(messages.GetMessage("attack_prompt"));
+            string? input = _input.ReadLine()?.Trim().ToLower();
 
             if (input == "r" || input == "retreat")
             {
                 PlayerRetreated = true;
-                Console.WriteLine(messages.GetMessage("retreat_combat"));
+                _output.WriteLine(messages.GetMessage("retreat_combat"));
                 return false;
             }
 
             if (input == "a" || input == "attack")
                 continue;
 
-            Console.WriteLine(messages.GetMessage("invalid"));
+            _output.WriteLine(messages.GetMessage("invalid"));
         }
     }
 
@@ -84,11 +89,11 @@ public class Combat
 
     public void PlayerAttacksDragonSequence()
     {
-        Console.WriteLine(player.Attack(dragon, messages));
+        _output.WriteLine(player.Attack(dragon, messages));
     }
 
     public void DragonAttacksPlayerSequence()
     {
-        Console.WriteLine(dragon.Attack(player, messages));
+        _output.WriteLine(dragon.Attack(player, messages));
     }
 }

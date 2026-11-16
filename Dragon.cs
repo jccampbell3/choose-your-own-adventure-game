@@ -135,14 +135,14 @@ public class Dragon
         return messages.GetMessage(_damageReplyKeys[index]);
     }
 
-    public void DisplayStats(Messages messages)
+    public void DisplayStats(Messages messages, TextWriter output)
     {
-        Console.WriteLine(messages.GetMessage("dragon_stats_header"));
-        Console.WriteLine(messages.GetMessage("stats_name") + Name);
-        Console.WriteLine(messages.GetMessage("stats_strength") + Strength);
-        Console.WriteLine(messages.GetMessage("stats_agility") + Agility);
-        Console.WriteLine(messages.GetMessage("stats_health") + HealthPoints);
-        Console.WriteLine(messages.GetMessage("stats_weapon") + messages.TranslateWeaponForDisplay(Weapon.Type));
-        Console.WriteLine(messages.GetMessage("stats_damage") + Weapon.MaxDamage);
+        output.WriteLine(messages.GetMessage("dragon_stats_header"));
+        output.WriteLine(messages.GetMessage("stats_name") + Name);
+        output.WriteLine(messages.GetMessage("stats_strength") + Strength);
+        output.WriteLine(messages.GetMessage("stats_agility") + Agility);
+        output.WriteLine(messages.GetMessage("stats_health") + HealthPoints);
+        output.WriteLine(messages.GetMessage("stats_weapon") + messages.TranslateWeaponForDisplay(Weapon.Type));
+        output.WriteLine(messages.GetMessage("stats_damage") + Weapon.MaxDamage);
     }
 }

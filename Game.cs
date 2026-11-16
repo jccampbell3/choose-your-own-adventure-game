@@ -1,22 +1,39 @@
 public class Game
 {
+    private readonly TextReader _input;
+    private readonly TextWriter _output;
+    private readonly Die _die;
+
+    // True only when writing to the real console, the one place where text colour applies.
+    private readonly bool _outputIsConsole;
+
+    /// <summary>
+    /// A game that reads, writes and rolls with what it is given. Anything left out is the real console
+    /// or an ordinary Die. The console is read here, so a test that swaps it before creating the game still works.
+    /// </summary>
+    public Game(TextReader? input = null, TextWriter? output = null, Die? die = null)
+    {
+        _input = input ?? Console.In;
+        _output = output ?? Console.Out;
+        _outputIsConsole = output == null;
+        _die = die ?? new Die();
+    }
+
     public void StartGame()
     {
         // Title screen
-        Console.WriteLine("=====================================");
-        Console.WriteLine("Welcome to Choose Your Adventure Game");
-        Console.WriteLine("=====================================\n");
+        _output.WriteLine("=====================================");
+        _output.WriteLine("Welcome to Choose Your Adventure Game");
+        _output.WriteLine("=====================================\n");
 
-        // Instantiate Die first (per sequence diagram)
-        Die die = new Die();
-
-        Dragon dragon = new Dragon(die);
+        // The Dragon is created first (per sequence diagram), so its stats are the game Die's first rolls.
+        Dragon dragon = new Dragon(_die);
 
         // Language selection shown before Messages dictionary is loaded
-        Console.WriteLine("Select language / Selecciona idioma / Choisissez la langue / Scegli la lingua:");
-        Console.WriteLine("1. English  2. Espanol  3. Francais  4. Italiano");
-        Console.Write("Enter choice: ");
-        string? langInput = Console.ReadLine()?.Trim();
+        _output.WriteLine("Select language / Selecciona idioma / Choisissez la langue / Scegli la lingua:");
+        _output.WriteLine("1. English  2. Espanol  3. Francais  4. Italiano");
+        _output.Write("Enter choice: ");
+        string? langInput = _input.ReadLine()?.Trim();
         string selectedLanguage = langInput switch { "2" => "Spanish", "3" => "French", "4" => "Italian", _ => "English" };
 
         // Initialize Messages with selected language (per sequence diagram)
@@ -25,22 +42,22 @@ public class Game
         messages.SetCurrentLanguage(selectedLanguage);
         messages.ReadDictionary();
         // Display welcome message
-        Console.WriteLine();
-        Console.WriteLine(messages.GetMessage("welcome"));
-        Console.WriteLine();
+        _output.WriteLine();
+        _output.WriteLine(messages.GetMessage("welcome"));
+        _output.WriteLine();
 
         // Main menu loop
         bool running = true;
         while (running)
         {
-            Console.WriteLine(messages.GetMessage("menu"));
-            Console.Write(messages.GetMessage("enter_choice"));
-            string? choice = Console.ReadLine()?.Trim();
+            _output.WriteLine(messages.GetMessage("menu"));
+            _output.Write(messages.GetMessage("enter_choice"));
+            string? choice = _input.ReadLine()?.Trim();
 
             if (choice == "1")
             {
-                Player player = new Player(die);
-                player.CreateCharacter(messages);
+                Player player = new Player(_die);
+                player.CreateCharacter(messages, _input, _output);
 
                 bool inAdventureMenu = true;
                 while (inAdventureMenu)
@@ -49,7 +66,7 @@ public class Game
 
                     if (selectedPath == "exit")
                     {
-                        Console.WriteLine(messages.GetMessage("adventure_ends"));
+                        _output.WriteLine(messages.GetMessage("adventure_ends"));
                         running = false;
                         inAdventureMenu = false;
                     }
@@ -59,7 +76,7 @@ public class Game
                     }
                     else if (selectedPath == "west")
                     {
-                        HandleShrineEncounter(player, die, messages);
+                        HandleShrineEncounter(player, messages);
                     }
                     else if (selectedPath == "north")
                     {
@@ -72,12 +89,12 @@ public class Game
             }
             else if (choice == "2")
             {
-                Console.WriteLine(messages.GetMessage("goodbye"));
+                _output.WriteLine(messages.GetMessage("goodbye"));
                 running = false;
             }
             else
             {
-                Console.WriteLine(messages.GetMessage("invalid"));
+                _output.WriteLine(messages.GetMessage("invalid"));
             }
         }
     }
@@ -85,11 +102,11 @@ public class Game
     public void EndGame(bool playerWon, bool playerRetreated, Messages messages)
     {
         if (playerRetreated)
-            Console.WriteLine(messages.GetMessage("retreat"));
+            _output.WriteLine(messages.GetMessage("retreat"));
         else if (playerWon)
-            Console.WriteLine(messages.GetMessage("victory"));
+            _output.WriteLine(messages.GetMessage("victory"));
         else
-            Console.WriteLine(messages.GetMessage("defeat"));
+            _output.WriteLine(messages.GetMessage("defeat"));
     }
 
     public bool IsValidMenuChoice(string? input)
@@ -122,9 +139,9 @@ public class Game
     {
         while (true)
         {
-            Console.WriteLine(messages.GetMessage("path_prompt_full"));
-            Console.Write(messages.GetMessage("enter_choice"));
-            string? input = Console.ReadLine()?.Trim().ToLower();
+            _output.WriteLine(messages.GetMessage("path_prompt_full"));
+            _output.Write(messages.GetMessage("enter_choice"));
+            string? input = _input.ReadLine()?.Trim().ToLower();
 
             if (input == "north" || input == "n")
                 return "north";
@@ -141,33 +158,33 @@ public class Game
             if (input == "inventory" || input == "i")
             {
                 foreach (string line in Inventory.Lines(player, messages))
-                    Console.WriteLine(line);
+                    _output.WriteLine(line);
                 continue;
             }
 
-            Console.WriteLine(messages.GetMessage("path_invalid"));
+            _output.WriteLine(messages.GetMessage("path_invalid"));
         }
     }
 
     // Thin console loop around the Merchant's rules; afterwards the Player is back at the path prompt.
     private void HandleMerchantEncounter(Player player, Messages messages)
     {
-        Console.WriteLine(messages.GetMessage("south_path_narrative"));
+        _output.WriteLine(messages.GetMessage("south_path_narrative"));
 
         if (!Merchant.WillOffer(player))
         {
-            Console.WriteLine(messages.GetMessage("merchant_refusal"));
+            _output.WriteLine(messages.GetMessage("merchant_refusal"));
             return;
         }
 
-        Console.WriteLine(messages.GetMessage("merchant_greeting"));
+        _output.WriteLine(messages.GetMessage("merchant_greeting"));
 
         MerchantChoice choice;
         while (true)
         {
-            Console.WriteLine(messages.GetMessage("merchant_offer"));
-            Console.Write(messages.GetMessage("enter_choice"));
-            string? input = Console.ReadLine();
+            _output.WriteLine(messages.GetMessage("merchant_offer"));
+            _output.Write(messages.GetMessage("enter_choice"));
+            string? input = _input.ReadLine();
 
             // End of input: treat as leaving so a closed console can't loop forever.
             if (input == null)
@@ -179,48 +196,48 @@ public class Game
             if (Merchant.TryParseChoice(input, out choice))
                 break;
 
-            Console.WriteLine(messages.GetMessage("merchant_invalid"));
+            _output.WriteLine(messages.GetMessage("merchant_invalid"));
         }
 
         switch (Merchant.Choose(player, choice))
         {
             case MerchantOutcome.Armor:
-                Console.WriteLine(messages.GetMessage("merchant_received_armor"));
+                _output.WriteLine(messages.GetMessage("merchant_received_armor"));
                 break;
             case MerchantOutcome.Weapon:
-                Console.WriteLine(string.Format(
+                _output.WriteLine(string.Format(
                     messages.GetMessage("merchant_received_weapon"),
                     messages.TranslateWeaponForDisplay(player.Weapon!.Type)));
                 break;
             case MerchantOutcome.Left:
-                Console.WriteLine(messages.GetMessage("merchant_leave"));
+                _output.WriteLine(messages.GetMessage("merchant_leave"));
                 break;
             case MerchantOutcome.Refused:
-                Console.WriteLine(messages.GetMessage("merchant_refusal"));
+                _output.WriteLine(messages.GetMessage("merchant_refusal"));
                 break;
         }
     }
 
     // Thin console loop around the Shrine's rules; afterwards the Player is back at the path prompt.
-    private void HandleShrineEncounter(Player player, Die die, Messages messages)
+    private void HandleShrineEncounter(Player player, Messages messages)
     {
-        Console.WriteLine(messages.GetMessage("west_path_narrative"));
+        _output.WriteLine(messages.GetMessage("west_path_narrative"));
 
         if (!Shrine.WillOffer(player))
         {
-            Console.WriteLine(messages.GetMessage("shrine_silent"));
+            _output.WriteLine(messages.GetMessage("shrine_silent"));
             return;
         }
 
-        Console.WriteLine(messages.GetMessage("shrine_greeting"));
-        Console.WriteLine(messages.GetMessage("shrine_warning"));
+        _output.WriteLine(messages.GetMessage("shrine_greeting"));
+        _output.WriteLine(messages.GetMessage("shrine_warning"));
 
         ShrineChoice choice;
         while (true)
         {
-            Console.WriteLine(messages.GetMessage("shrine_offer"));
-            Console.Write(messages.GetMessage("enter_choice"));
-            string? input = Console.ReadLine();
+            _output.WriteLine(messages.GetMessage("shrine_offer"));
+            _output.Write(messages.GetMessage("enter_choice"));
+            string? input = _input.ReadLine();
 
             // End of input: treat as leaving so a closed console can't loop forever.
             if (input == null)
@@ -232,10 +249,10 @@ public class Game
             if (Shrine.TryParseChoice(input, out choice))
                 break;
 
-            Console.WriteLine(messages.GetMessage("shrine_invalid"));
+            _output.WriteLine(messages.GetMessage("shrine_invalid"));
         }
 
-        ShrineResult result = Shrine.Choose(player, choice, die);
+        ShrineResult result = Shrine.Choose(player, choice, _die);
         switch (result.Outcome)
         {
             case ShrineOutcome.Blessing:
@@ -248,41 +265,43 @@ public class Game
                 PrintPrayer(result.Roll, "shrine_curse", player, messages);
                 break;
             case ShrineOutcome.Left:
-                Console.WriteLine(messages.GetMessage("shrine_leave"));
+                _output.WriteLine(messages.GetMessage("shrine_leave"));
                 break;
             case ShrineOutcome.Silent:
-                Console.WriteLine(messages.GetMessage("shrine_silent"));
+                _output.WriteLine(messages.GetMessage("shrine_silent"));
                 break;
         }
     }
 
     // A Prayer prints the roll, then what the gods did, then the Player's HealthPoints.
-    private static void PrintPrayer(int? roll, string outcomeKey, Player player, Messages messages)
+    private void PrintPrayer(int? roll, string outcomeKey, Player player, Messages messages)
     {
-        Console.WriteLine(string.Format(messages.GetMessage("shrine_roll"), roll));
-        Console.WriteLine(messages.GetMessage(outcomeKey));
-        Console.WriteLine(messages.GetMessage("stats_health") + player.HealthPoints);
+        _output.WriteLine(string.Format(messages.GetMessage("shrine_roll"), roll));
+        _output.WriteLine(messages.GetMessage(outcomeKey));
+        _output.WriteLine(messages.GetMessage("stats_health") + player.HealthPoints);
     }
 
     private void HandleDragonEncounter(Player player, Dragon dragon, Messages messages)
     {
-        Console.WriteLine(messages.GetMessage("north_path_narrative"));
+        _output.WriteLine(messages.GetMessage("north_path_narrative"));
 
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(string.Format(messages.GetMessage("dragon_intro"), dragon.Name));
-        Console.ResetColor();
+        if (_outputIsConsole)
+            Console.ForegroundColor = ConsoleColor.Red;
+        _output.WriteLine(string.Format(messages.GetMessage("dragon_intro"), dragon.Name));
+        if (_outputIsConsole)
+            Console.ResetColor();
 
-        Console.WriteLine(messages.GetMessage("dragon_stats_intro"));
-        dragon.DisplayStats(messages);
+        _output.WriteLine(messages.GetMessage("dragon_stats_intro"));
+        dragon.DisplayStats(messages, _output);
         while (true)
         {
-            Console.WriteLine(messages.GetMessage("dragon_encounter_prompt"));
-            Console.Write(messages.GetMessage("enter_choice"));
-            string? input = Console.ReadLine()?.Trim().ToLower();
+            _output.WriteLine(messages.GetMessage("dragon_encounter_prompt"));
+            _output.Write(messages.GetMessage("enter_choice"));
+            string? input = _input.ReadLine()?.Trim().ToLower();
 
             if (input == "a" || input == "attack")
             {
-                Combat combat = new Combat(player, dragon, messages);
+                Combat combat = new Combat(player, dragon, messages, _input, _output);
                 bool playerWon = combat.StartCombat();
 
                 if (combat.PlayerRetreated)
@@ -299,11 +318,11 @@ public class Game
 
         if (input == "r" || input == "retreat")
         {
-            Console.WriteLine(messages.GetMessage("retreat"));
+            _output.WriteLine(messages.GetMessage("retreat"));
             return;
         }
 
-        Console.WriteLine(messages.GetMessage("invalid"));
+        _output.WriteLine(messages.GetMessage("invalid"));
     }
 }
 }

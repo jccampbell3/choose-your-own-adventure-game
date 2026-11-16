@@ -16,20 +16,8 @@ public class StartingHealthTests
             .Concat(nextActions.Length > 0 ? nextActions : new[] { "2" })
             .ToArray();
 
-        TextReader originalIn = Console.In;
-        TextWriter originalOut = Console.Out;
         StringWriter output = new StringWriter();
-        Console.SetIn(new StringReader(string.Join(Environment.NewLine, lines) + Environment.NewLine));
-        Console.SetOut(output);
-        try
-        {
-            player.CreateCharacter(LoadMessages());
-        }
-        finally
-        {
-            Console.SetIn(originalIn);
-            Console.SetOut(originalOut);
-        }
+        player.CreateCharacter(LoadMessages(), ScriptedInput(lines), output);
 
         return (player, output.ToString());
     }
@@ -39,7 +27,6 @@ public class StartingHealthTests
         new[] { 10, strengthModifier, 10, 2, healthRoll };
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     [DataRow(1)]
     [DataRow(2)]
     [DataRow(3)]
@@ -52,7 +39,6 @@ public class StartingHealthTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     [DataRow(5, 2, 3)]
     [DataRow(2, 1, 1)]
     [DataRow(20, 4, 16)]
@@ -64,7 +50,6 @@ public class StartingHealthTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void Human_HealthRollOfOne_StillGetsPositiveModifier()
     {
         // Human roll order: Strength d20, Strength modifier d4, Agility d20, health d20.
@@ -74,7 +59,6 @@ public class StartingHealthTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void Halfling_FlooredHealth_LeavesStrengthAndAgilityUnchanged()
     {
         (Player player, _) = CreateCharacter("halfling", HalflingRolls(strengthModifier: 4, healthRoll: 1));
@@ -84,7 +68,6 @@ public class StartingHealthTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void StatsScreen_ShowsFlooredStartingHealth()
     {
         // "1" shows the stats screen, then "2" proceeds.

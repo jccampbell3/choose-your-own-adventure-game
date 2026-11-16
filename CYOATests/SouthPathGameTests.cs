@@ -1,5 +1,5 @@
 // CYOATests/SouthPathGameTests.cs
-// Game entry point seam: scripted standard input drives the real game loop.
+// Game entry point seam: scripted input, captured output and a scripted Die drive the real game loop.
 using static TestSupport;
 
 [TestClass]
@@ -8,7 +8,6 @@ public class SouthPathGameTests
     private const string OldSouthText = "You are bored and return home";
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void SouthLoop_GetItemThenRefusedOnSecondVisit()
     {
         string output = RunGame(CreateEnglishFighter.Concat(new[] { "s", "2", "s", "e" }).ToArray());
@@ -23,7 +22,6 @@ public class SouthPathGameTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void SouthLoop_LeaveThenOfferedAgain()
     {
         string output = RunGame(CreateEnglishFighter.Concat(new[] { "s", "3", "s", "1", "e" }).ToArray());
@@ -34,7 +32,6 @@ public class SouthPathGameTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void SouthLoop_InvalidInputAtMerchant_ShowsErrorAndAsksAgain()
     {
         string output = RunGame(CreateEnglishFighter.Concat(new[] { "s", "7", "armor", "1", "e" }).ToArray());
@@ -45,7 +42,6 @@ public class SouthPathGameTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void SouthLoop_InItalian_ShowsTranslatedMerchantText()
     {
         string[] createItalianArcher = { "4", "1", "umano", "Eroe", "arciere", "roll", "roll", "roll", "2" };

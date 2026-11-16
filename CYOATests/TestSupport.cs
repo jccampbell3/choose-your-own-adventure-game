@@ -37,29 +37,22 @@ public static class TestSupport
 
     /// <summary>
     /// Plays the real game with the given input lines and returns everything it printed.
-    /// Swaps the shared Console, so callers must be [DoNotParallelize]. Scripts must end the game
-    /// (for example with "e"), because the path prompt loops forever when input runs out.
+    /// Every roll is 1, so the run is deterministic; use the overload to script the rolls.
+    /// Scripts must end the game (for example with "e"), because the path prompt loops forever when input runs out.
     /// </summary>
-    public static string RunGame(params string[] lines)
+    public static string RunGame(params string[] lines) => RunGame(new ScriptedDie(), lines);
+
+    /// <summary>Plays the real game with the given input lines and Die, and returns everything it printed.</summary>
+    public static string RunGame(ScriptedDie die, params string[] lines)
     {
-        TextReader originalIn = Console.In;
-        TextWriter originalOut = Console.Out;
         StringWriter output = new StringWriter();
-
-        Console.SetIn(new StringReader(string.Join(Environment.NewLine, lines) + Environment.NewLine));
-        Console.SetOut(output);
-        try
-        {
-            new Game().StartGame();
-        }
-        finally
-        {
-            Console.SetIn(originalIn);
-            Console.SetOut(originalOut);
-        }
-
+        new Game(ScriptedInput(lines), output, die).StartGame();
         return output.ToString();
     }
+
+    /// <summary>A reader that answers each prompt with the next line.</summary>
+    public static TextReader ScriptedInput(params string[] lines) =>
+        new StringReader(string.Join(Environment.NewLine, lines) + Environment.NewLine);
 
     /// <summary>How many times <paramref name="value"/> appears in <paramref name="text"/>, without overlaps.</summary>
     public static int CountOccurrences(string text, string value)

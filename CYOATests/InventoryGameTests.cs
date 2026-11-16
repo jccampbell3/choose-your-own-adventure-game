@@ -1,5 +1,5 @@
 // CYOATests/InventoryGameTests.cs
-// Game entry point seam: scripted standard input drives the real game loop.
+// Game entry point seam: scripted input, captured output and a scripted Die drive the real game loop.
 using static TestSupport;
 
 [TestClass]
@@ -9,7 +9,6 @@ public class InventoryGameTests
     private const string InventoryHeader = "----- Inventory -----";
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void InventoryCommand_ShowsWeaponThenPathPromptAgain()
     {
         string output = RunGame(CreateEnglishFighter.Concat(new[] { "i", "e" }).ToArray());
@@ -24,7 +23,6 @@ public class InventoryGameTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void InventoryCommand_EndToEnd_ArmorAppearsAfterMerchant()
     {
         // look, go south and take the Armor, look again, exit
@@ -47,7 +45,6 @@ public class InventoryGameTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     [DataRow("2", new[] { "1", "humano", "Heroe", "guerrero" }, "----- Inventario -----", "Arma: espada larga")]
     [DataRow("4", new[] { "1", "umano", "Eroe", "guerriero" }, "----- Inventario -----", "Arma: spada lunga")]
     public void InventoryCommand_InOtherLanguages_ShowsTranslatedInventory(

@@ -1,5 +1,5 @@
 // CYOATests/WestPathGameTests.cs
-// Game entry point seam: scripted standard input drives the real game loop.
+// Game entry point seam: scripted input, captured output and a scripted Die drive the real game loop.
 using static TestSupport;
 
 [TestClass]
@@ -9,7 +9,6 @@ public class WestPathGameTests
     private const string PathPrompt = "Which do you take?";
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void WestLoop_InvalidInputThenLeave_ReturnsToCrossroads()
     {
         string output = RunGame(CreateEnglishFighter.Concat(new[] { "west", "9", "2", "e" }).ToArray());
@@ -24,7 +23,6 @@ public class WestPathGameTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     public void WestLoop_EndToEnd_LeaveOfferedAgainPrayThenSilent()
     {
         // west, invalid, leave, west (offer again), pray, west (Silent), exit
@@ -42,23 +40,28 @@ public class WestPathGameTests
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
-    public void WestLoop_Pray_ShowsRollOutcomeAndHealth()
+    [DataRow(6, "You are Blessed!", 14)]
+    [DataRow(5, "You are Blessed!", 14)]
+    [DataRow(4, "Nothing happens.", 11)]
+    [DataRow(3, "Nothing happens.", 11)]
+    [DataRow(2, "You are Cursed!", 8)]
+    [DataRow(1, "You are Cursed!", 8)]
+    public void WestLoop_Pray_ShowsScriptedRollOutcomeAndHealth(int roll, string outcome, int health)
     {
-        string output = RunGame(CreateEnglishFighter.Concat(new[] { "w", "1", "e" }).ToArray());
+        // Dragon 10/10/10, then the Fighter: Strength 10+1, Agility 10, HealthPoints 10+1; then the Prayer.
+        ScriptedDie die = new ScriptedDie();
+        die.Script(10, 10, 10, 10, 1, 10, 10, roll);
 
-        // The game's own Die is not scripted, so only check that one outcome appeared.
-        StringAssert.Matches(output, new System.Text.RegularExpressions.Regex(@"The die shows [1-6]\."));
-        int outcomes = new[] { "You are Blessed!", "Nothing happens.", "You are Cursed!" }
-            .Count(text => output.Contains(text));
-        Assert.AreEqual(1, outcomes, "Exactly one Prayer outcome should be shown.");
+        string output = RunGame(die, CreateEnglishFighter.Concat(new[] { "w", "1", "e" }).ToArray());
+
+        StringAssert.Contains(output, $"The die shows {roll}.");
+        StringAssert.Contains(output, outcome);
         int rollAt = output.IndexOf("The die shows");
-        Assert.IsTrue(output.IndexOf("Health Points: ", rollAt) > rollAt, "HealthPoints are shown after the Prayer.");
+        Assert.IsTrue(output.IndexOf($"Health Points: {health}", rollAt) > rollAt, "HealthPoints are shown after the Prayer.");
         Assert.AreEqual(2, CountOccurrences(output, PathPrompt), "The Player should return to the path prompt after praying.");
     }
 
     [TestMethod]
-    [DoNotParallelize] // redirects the shared Console
     [DataRow("2", new[] { "1", "humano", "Heroe", "guerrero" }, "El dado muestra", "Santuario")]
     [DataRow("3", new[] { "1", "humain", "Heros", "guerrier" }, "Le de montre", "Sanctuaire")]
     [DataRow("4", new[] { "1", "umano", "Eroe", "guerriero" }, "Il dado mostra", "Santuario")]
