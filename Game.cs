@@ -39,7 +39,7 @@ public class Game
 
             if (choice == "1")
             {
-                Player player = new Player();
+                Player player = new Player(die);
                 player.CreateCharacter(messages);
 
                 bool inAdventureMenu = true;

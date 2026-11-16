@@ -1,6 +1,14 @@
 public class Player
 {
-    private readonly Die _die = new Die();
+    public const int MinimumStartingHealthPoints = 1;
+
+    private readonly Die _die;
+
+    // Rolls with the given Die (tests pass a scripted one); with none, an ordinary Die.
+    public Player(Die? die = null)
+    {
+        _die = die ?? new Die();
+    }
 
     public string Name { get; set; } = "";
     public string Race { get; set; } = "";
@@ -123,7 +131,8 @@ public class Player
     private void RollHealthPoints(Messages messages, int strengthModifier)
     {
         PromptRoll(messages.GetMessage("roll_health"), messages);
-        HealthPoints = _die.Roll(20) + strengthModifier;
+        // Never below 1, like the Shrine's Curse: a Halfling's negative modifier must not start them dead.
+        HealthPoints = Math.Max(MinimumStartingHealthPoints, _die.Roll(20) + strengthModifier);
     }
 
     private void PromptForNextAction(Messages messages)
