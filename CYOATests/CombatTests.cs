@@ -148,4 +148,71 @@ public class CombatTests
         StringAssert.Contains(result, messages.GetMessage("stats_weapon"));
         StringAssert.Contains(result, messages.GetMessage("stats_damage"));
     }
+
+    // --- Magical Items in the combat stats ---
+
+    [TestMethod]
+    public void GetCombatStatsDisplay_WithArmor_ShowsArmorAndReduction()
+    {
+        Player player = CreateTestPlayer();
+        player.Armor = new Armor();
+        Combat combat = new Combat(player, CreateTestDragon(), CreateEnglishMessages());
+
+        string result = combat.GetCombatStatsDisplay();
+
+        StringAssert.Contains(result, "Armor: magical armor");
+        StringAssert.Contains(result, "Armor Damage Reduction: 2");
+    }
+
+    [TestMethod]
+    public void GetCombatStatsDisplay_WithoutArmor_ShowsNoArmorLines()
+    {
+        Combat combat = new Combat(CreateTestPlayer(), CreateTestDragon(), CreateEnglishMessages());
+
+        string result = combat.GetCombatStatsDisplay();
+
+        Assert.IsFalse(result.Contains("Armor"), result);
+    }
+
+    [TestMethod]
+    public void GetCombatStatsDisplay_WithMagicalWeapon_ShowsMagicalNameAndBoostedDamage()
+    {
+        Player player = CreateTestPlayer();
+        Merchant.Choose(player, MerchantChoice.Weapon);
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage("Italian");
+        messages.ReadDictionary();
+        Combat combat = new Combat(player, CreateTestDragon(), messages);
+
+        string result = combat.GetCombatStatsDisplay();
+
+        StringAssert.Contains(result, "Arma: spada lunga magica");
+        StringAssert.Contains(result, "Danno Massimo dell'Arma: 14");
+    }
+
+    [TestMethod]
+    [DoNotParallelize] // redirects the shared Console
+    public void PlayerDisplayStats_ShowsArmorOnlyWhenOwned()
+    {
+        Messages messages = CreateEnglishMessages();
+        Player player = CreateTestPlayer();
+
+        string without = CaptureConsole(() => player.DisplayStats(messages));
+        player.Armor = new Armor();
+        string with = CaptureConsole(() => player.DisplayStats(messages));
+
+        Assert.IsFalse(without.Contains("Armor"), without);
+        StringAssert.Contains(with, "Armor: magical armor");
+        StringAssert.Contains(with, "Armor Damage Reduction: 2");
+    }
+
+    private static string CaptureConsole(Action action)
+    {
+        TextWriter original = Console.Out;
+        StringWriter writer = new StringWriter();
+        Console.SetOut(writer);
+        try { action(); }
+        finally { Console.SetOut(original); }
+        return writer.ToString();
+    }
 }

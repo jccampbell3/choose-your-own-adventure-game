@@ -93,12 +93,27 @@ public class Dragon
         }
 
         int damage = RollDamage();
+
+        // Magical Armor reduces every Dragon hit; this is the only place the rule applies.
+        if (player.Armor != null)
+        {
+            int rolledDamage = damage;
+            damage = player.Armor.Reduce(rolledDamage);
+
+            if (damage == 0)
+                output.Add(messages.GetMessage("armor_absorbs_blow"));
+            else if (damage < rolledDamage)
+                output.Add(string.Format(messages.GetMessage("armor_absorbs_damage"), rolledDamage - damage));
+        }
+
         player.HealthPoints -= damage;
 
         if (player.HealthPoints < 0)
             player.HealthPoints = 0;
 
-        output.Add(string.Format(messages.GetMessage("dragon_damage_dealt"), Name, damage));
+        if (damage > 0)
+            output.Add(string.Format(messages.GetMessage("dragon_damage_dealt"), Name, damage));
+
         output.Add(string.Format(messages.GetMessage("player_health_now"), player.Name, player.HealthPoints));
 
         if (player.HealthPoints <= 0)
