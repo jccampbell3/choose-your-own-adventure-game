@@ -8,7 +8,7 @@ public class Weapon
     public string AsciiArt { get; set; }
 
     // Stored explicitly so translations or renames can't change what counts as magical (ADR 0002).
-    public bool IsMagical { get; set; }
+    public bool IsMagical { get; init; }
 
     public Weapon(string type, int maxDamage, string asciiArt)
     {
