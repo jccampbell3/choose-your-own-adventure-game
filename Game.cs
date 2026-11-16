@@ -70,7 +70,7 @@ public class Game
             if (choice == "1")
             {
                 Player player = new Player(_die);
-                player.CreateCharacter(messages, _input, _output);
+                player.CreateCharacter(messages, _prompt, _output);
 
                 bool inAdventureMenu = true;
                 while (inAdventureMenu)

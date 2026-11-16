@@ -17,7 +17,7 @@ public class StartingHealthTests
             .ToArray();
 
         StringWriter output = new StringWriter();
-        player.CreateCharacter(LoadMessages(), ScriptedInput(lines), output);
+        player.CreateCharacter(LoadMessages(), new Prompt(ScriptedInput(lines), output), output);
 
         return (player, output.ToString());
     }

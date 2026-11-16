@@ -29,6 +29,34 @@ public class EndOfInputGameTests
     }
 
     [TestMethod]
+    [DataRow(2, "What race of character do you want to be?")]
+    [DataRow(3, "What is the name of your character?")]
+    [DataRow(4, "What is the occupation of your character?")]
+    [DataRow(5, "we are going to roll for strength")]
+    [DataRow(6, "we will roll for agility")]
+    [DataRow(7, "we will roll for health points")]
+    [DataRow(8, "What would you like to do next?")]
+    public void InputEndsDuringCharacterCreation_EndsTheAdventure(int linesGiven, string lastPrompt)
+    {
+        string output = RunGame(CreateEnglishFighter.Take(linesGiven).ToArray());
+
+        StringAssert.Contains(output, lastPrompt);
+        Assert.IsFalse(output.Contains("Which do you take?"), "The adventure ends before the crossroads.");
+        AssertEndsWith(output, AdventureEnds);
+    }
+
+    [TestMethod]
+    public void InputEndsAfterInvalidCharacterAnswers_EndsTheAdventure()
+    {
+        // Invalid Race, then a valid one; empty name, then a valid one; invalid Occupation; then nothing.
+        string output = RunGame("1", "1", "orc", "human", "", "Hero", "pirate");
+
+        StringAssert.Contains(output, "Invalid race");
+        StringAssert.Contains(output, "Invalid occupation");
+        AssertEndsWith(output, AdventureEnds);
+    }
+
+    [TestMethod]
     public void InputEndsAtThePathPrompt_EndsTheAdventure()
     {
         string output = RunGame(CreateEnglishFighter);

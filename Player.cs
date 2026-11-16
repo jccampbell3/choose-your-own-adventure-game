@@ -26,61 +26,54 @@ public class Player
     // True once the Player has made their one Prayer at the Shrine. Not shown in the stats.
     public bool HasPrayed { get; set; }
 
-    public void CreateCharacter(Messages messages, TextReader reader, TextWriter writer)
+    public void CreateCharacter(Messages messages, Prompt prompt, TextWriter writer)
     {
-        Race = PromptForRace(messages, reader, writer);
-        Name = PromptForName(messages, reader, writer);
-        Occupation = PromptForOccupation(messages, reader, writer);
+        Race = PromptForRace(messages, prompt);
+        Name = PromptForName(messages, prompt);
+        Occupation = PromptForOccupation(messages, prompt);
 
         AssignWeaponByOccupation();
 
-        int strengthModifier = RollStrength(messages, reader, writer);
-        RollAgility(messages, reader, writer);
-        RollHealthPoints(messages, strengthModifier, reader, writer);
+        int strengthModifier = RollStrength(messages, prompt);
+        RollAgility(messages, prompt);
+        RollHealthPoints(messages, strengthModifier, prompt);
 
-        PromptForNextAction(messages, reader, writer);
+        PromptForNextAction(messages, prompt, writer);
     }
 
-    private string PromptForRace(Messages messages, TextReader reader, TextWriter writer)
+    // Any Race name in the current Language; returns its Canonical Name.
+    private static string PromptForRace(Messages messages, Prompt prompt)
     {
-        while (true)
+        bool Parse(string? input, out string race)
         {
-            writer.WriteLine(messages.GetMessage("race_prompt"));
-            string? input = reader.ReadLine()?.Trim();
-
-            if (messages.IsValidRace(input))
-                return messages.NormalizeRace(input!);
-
-            writer.WriteLine(messages.GetMessage("race_invalid"));
+            race = messages.IsValidRace(input) ? messages.NormalizeRace(input!.Trim()) : "";
+            return race != "";
         }
+
+        return prompt.Ask<string>(messages.GetMessage("race_prompt"), Parse, messages.GetMessage("race_invalid"));
     }
 
-    private string PromptForName(Messages messages, TextReader reader, TextWriter writer)
+    private static string PromptForName(Messages messages, Prompt prompt)
     {
-        while (true)
+        static bool Parse(string? input, out string name)
         {
-            writer.WriteLine(messages.GetMessage("name_prompt"));
-            string? input = reader.ReadLine()?.Trim();
-
-            if (!string.IsNullOrWhiteSpace(input))
-                return input;
-
-            writer.WriteLine(messages.GetMessage("name_invalid"));
+            name = input?.Trim() ?? "";
+            return name != "";
         }
+
+        return prompt.Ask<string>(messages.GetMessage("name_prompt"), Parse, messages.GetMessage("name_invalid"));
     }
 
-    private string PromptForOccupation(Messages messages, TextReader reader, TextWriter writer)
+    // Any Occupation name in the current Language; returns its Canonical Name.
+    private static string PromptForOccupation(Messages messages, Prompt prompt)
     {
-        while (true)
+        bool Parse(string? input, out string occupation)
         {
-            writer.WriteLine(messages.GetMessage("occupation_prompt"));
-            string? input = reader.ReadLine()?.Trim();
-
-            if (messages.IsValidOccupation(input))
-                return messages.NormalizeOccupation(input!);
-
-            writer.WriteLine(messages.GetMessage("occupation_invalid"));
+            occupation = messages.IsValidOccupation(input) ? messages.NormalizeOccupation(input!.Trim()) : "";
+            return occupation != "";
         }
+
+        return prompt.Ask<string>(messages.GetMessage("occupation_prompt"), Parse, messages.GetMessage("occupation_invalid"));
     }
 
     private void AssignWeaponByOccupation()
@@ -102,9 +95,9 @@ public class Player
         }
     }
 
-    private int RollStrength(Messages messages, TextReader reader, TextWriter writer)
+    private int RollStrength(Messages messages, Prompt prompt)
     {
-        PromptRoll(messages.GetMessage("roll_strength"), messages, reader, writer);
+        PromptRoll(messages.GetMessage("roll_strength"), messages, prompt);
         Strength = _die.Roll(20);
 
         int modifier = _die.Roll(4);
@@ -119,36 +112,33 @@ public class Player
         return modifier;
     }
 
-    private void RollAgility(Messages messages, TextReader reader, TextWriter writer)
+    private void RollAgility(Messages messages, Prompt prompt)
     {
-        PromptRoll(messages.GetMessage("roll_agility"), messages, reader, writer);
+        PromptRoll(messages.GetMessage("roll_agility"), messages, prompt);
         Agility = _die.Roll(20);
 
         if (Race == "Halfling" || Race == "Elf")
             Agility += _die.Roll(4);
     }
 
-    private void RollHealthPoints(Messages messages, int strengthModifier, TextReader reader, TextWriter writer)
+    private void RollHealthPoints(Messages messages, int strengthModifier, Prompt prompt)
     {
-        PromptRoll(messages.GetMessage("roll_health"), messages, reader, writer);
+        PromptRoll(messages.GetMessage("roll_health"), messages, prompt);
         // Never below 1, like the Shrine's Curse: a Halfling's negative modifier must not start them dead.
         HealthPoints = Math.Max(MinimumStartingHealthPoints, _die.Roll(20) + strengthModifier);
     }
 
-    private void PromptForNextAction(Messages messages, TextReader reader, TextWriter writer)
+    private void PromptForNextAction(Messages messages, Prompt prompt, TextWriter writer)
     {
-        while (true)
+        // "1" lists the stats and asks again; "2" proceeds on the adventure.
+        static bool Parse(string? input, out string choice)
         {
-            writer.WriteLine(messages.GetMessage("next_action"));
-            string? input = reader.ReadLine()?.Trim();
-
-            if (input == "1")
-                DisplayStats(messages, writer);
-            else if (input == "2")
-                return;
-            else
-                writer.WriteLine(messages.GetMessage("invalid"));
+            choice = input?.Trim() ?? "";
+            return choice == "1" || choice == "2";
         }
+
+        while (prompt.Ask<string>(messages.GetMessage("next_action"), Parse, messages.GetMessage("invalid")) == "1")
+            DisplayStats(messages, writer);
     }
 
     public void DisplayStats(Messages messages, TextWriter writer)
@@ -248,17 +238,14 @@ public class Player
         return string.Join(Environment.NewLine, output);
     }
 
-    private void PromptRoll(string prompt, Messages messages, TextReader reader, TextWriter writer)
+    private static void PromptRoll(string question, Messages messages, Prompt prompt)
     {
-        while (true)
+        static bool Parse(string? input, out bool rolled)
         {
-            writer.WriteLine(prompt);
-            string? input = reader.ReadLine()?.Trim().ToLower();
-
-            if (input == "roll")
-                return;
-
-            writer.WriteLine(messages.GetMessage("roll_invalid"));
+            rolled = input?.Trim().ToLower() == "roll";
+            return rolled;
         }
+
+        prompt.Ask<bool>(question, Parse, messages.GetMessage("roll_invalid"));
     }
 }
