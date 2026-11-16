@@ -55,7 +55,7 @@ public class Game
                     }
                     else if (selectedPath == "south")
                     {
-                        Console.WriteLine(messages.GetMessage("south_path_narrative"));
+                        HandleMerchantEncounter(player, messages);
                     }
                     else if (selectedPath == "north")
                     {
@@ -130,6 +130,58 @@ public class Game
                 return "exit";
 
             Console.WriteLine(messages.GetMessage("path_invalid"));
+        }
+    }
+
+    // Thin console loop around the Merchant's rules; afterwards the Player is back at the path prompt.
+    private void HandleMerchantEncounter(Player player, Messages messages)
+    {
+        Console.WriteLine(messages.GetMessage("south_path_narrative"));
+
+        if (!Merchant.WillOffer(player))
+        {
+            Console.WriteLine(messages.GetMessage("merchant_refusal"));
+            return;
+        }
+
+        Console.WriteLine(messages.GetMessage("merchant_greeting"));
+
+        MerchantChoice choice;
+        while (true)
+        {
+            Console.WriteLine(messages.GetMessage("merchant_offer"));
+            Console.Write(messages.GetMessage("enter_choice"));
+            string? input = Console.ReadLine();
+
+            // End of input: treat as leaving so a closed console can't loop forever.
+            if (input == null)
+            {
+                choice = MerchantChoice.Leave;
+                break;
+            }
+
+            if (Merchant.TryParseChoice(input, out choice))
+                break;
+
+            Console.WriteLine(messages.GetMessage("merchant_invalid"));
+        }
+
+        switch (Merchant.Choose(player, choice))
+        {
+            case MerchantOutcome.Armor:
+                Console.WriteLine(messages.GetMessage("merchant_received_armor"));
+                break;
+            case MerchantOutcome.Weapon:
+                Console.WriteLine(string.Format(
+                    messages.GetMessage("merchant_received_weapon"),
+                    messages.TranslateWeaponForDisplay(player.Weapon!.Type)));
+                break;
+            case MerchantOutcome.Left:
+                Console.WriteLine(messages.GetMessage("merchant_leave"));
+                break;
+            case MerchantOutcome.Refused:
+                Console.WriteLine(messages.GetMessage("merchant_refusal"));
+                break;
         }
     }
 

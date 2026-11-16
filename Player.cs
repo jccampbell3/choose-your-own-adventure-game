@@ -12,6 +12,9 @@ public class Player
 
     public Weapon? Weapon { get; set; }
 
+    // Magical Armor from the Merchant; null when the Player has none.
+    public Armor? Armor { get; set; }
+
     public void CreateCharacter(Messages messages)
     {
         Race = PromptForRace(messages);
@@ -150,6 +153,12 @@ public class Player
         {
             Console.WriteLine(messages.GetMessage("stats_weapon") + messages.TranslateWeaponForDisplay(Weapon.Type));
             Console.WriteLine(messages.GetMessage("stats_damage") + Weapon.MaxDamage);
+        }
+
+        if (Armor != null)
+        {
+            Console.WriteLine(messages.GetMessage("stats_armor") + messages.GetMessage("armor_name"));
+            Console.WriteLine(messages.GetMessage("stats_damage_reduction") + Armor.DamageReduction);
         }
     }
 

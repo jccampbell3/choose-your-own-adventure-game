@@ -171,21 +171,65 @@ public class MessagesTests
     }
 
     [TestMethod]
-    public void Italian_HasEveryKeyThatEnglishHas()
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void Language_HasEveryKeyThatEnglishHas(string language)
     {
         string jsonPath = Path.Combine(AppContext.BaseDirectory, "language_data.json");
         using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(jsonPath));
         var english = doc.RootElement.GetProperty("English");
-        var italian = doc.RootElement.GetProperty("Italian");
+        var other = doc.RootElement.GetProperty(language);
 
         foreach (string section in new[] { "dictionary", "displayRaceMap", "displayOccupationMap", "displayWeaponMap" })
         {
             foreach (var entry in english.GetProperty(section).EnumerateObject())
             {
-                Assert.IsTrue(italian.GetProperty(section).TryGetProperty(entry.Name, out _),
-                    $"Italian '{section}' is missing key '{entry.Name}'.");
+                Assert.IsTrue(other.GetProperty(section).TryGetProperty(entry.Name, out _),
+                    $"{language} '{section}' is missing key '{entry.Name}'.");
             }
         }
+    }
+
+    [TestMethod]
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void MagicalWeaponNames_AreTranslated(string language)
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage(language);
+        messages.ReadDictionary();
+
+        foreach (string canonical in new[] { "magical long sword", "magical lightning bolt spell", "magical dagger", "magical long bow" })
+        {
+            Assert.AreNotEqual(canonical, messages.TranslateWeaponForDisplay(canonical),
+                $"{language} has no translation for '{canonical}'.");
+        }
+    }
+
+    [TestMethod]
+    [DataRow("English")]
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void ArmorNameAndStatsLabels_ExistInEveryLanguage(string language)
+    {
+        Messages messages = new Messages();
+        messages.SetCurrentLanguage(language);
+        messages.ReadDictionary();
+
+        foreach (string key in new[] { "armor_name", "stats_armor", "stats_damage_reduction" })
+            Assert.AreNotEqual($"[{key}]", messages.GetMessage(key), $"{language} is missing '{key}'.");
+    }
+
+    [TestMethod]
+    public void LanguageData_HasNoAccentedLetters()
+    {
+        string jsonPath = Path.Combine(AppContext.BaseDirectory, "language_data.json");
+        string text = File.ReadAllText(jsonPath);
+
+        Assert.IsFalse(text.Any(c => c > 127), "language_data.json must stay plain ASCII for the Windows console.");
     }
 
     [TestMethod]
